@@ -39,7 +39,8 @@ Scripts
 -------
 
 The benchmarking and analysis comparison can be executed using the following scripts (in given order).
-The user must first edit all of file and directory paths in each script. 
+The user must edit all of file and directory paths in each script to follow their own directory
+structure. 
 
 1.  Even and staggered community reads were simulated using:<br/>
 OTU-clustering/shell_scripts/simulate_reads.sh

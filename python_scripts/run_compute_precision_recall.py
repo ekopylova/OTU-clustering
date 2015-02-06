@@ -48,7 +48,7 @@ summarize_tables_dir = "/scratch/Users/evko1434/working_dir/summarize_tables_mc2
 filter_otus_dir = "/scratch/Users/evko1434/working_dir/otu_tables_mc2"
 
 # output directory
-tmp_dir = "/home/evko1434/benchmarks/analyze_results/compute_precision_recall_results"
+tmp_dir = "/scratch/Users/evko1434/working_dir/compute_precision_recall_results"
 
 # chimera database for 18S
 chimera_db_18S = "/scratch/Users/evko1434/Silva_111_post/rep_set/97_Silva_111_rep_set.fasta"
