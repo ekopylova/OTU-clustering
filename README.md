@@ -39,13 +39,13 @@ Scripts
 -------
 
 The benchmarking and analysis comparison can be executed using the following scripts (in given order).
-The user must first edit all of the file and directory paths in each script. 
+The user must first edit all of file and directory paths in each script. 
 
-1.  Even and staggered community reads were simulated using:
+1.  Even and staggered community reads were simulated using:<br/>
 OTU-clustering/shell_scripts/simulate_reads.sh
-2.  Launch all software (via QIIME’s pick_closed_reference_otus.py, pick_de_novo_otus.py and pick_open_reference_otus.py) on 16S datasets:
+2.  Launch all software (via QIIME’s pick_closed_reference_otus.py, pick_de_novo_otus.py and pick_open_reference_otus.py) on 16S datasets:<br/>
 OTU-clustering/shell_scripts/commands_16S.sh
-3.  Launch all software on 18S datasets:
+3.  Launch all software on 18S datasets:<br/>
 OTU-clustering/shell_scripts/commands_18S.sh
 4.  Remove singleton OTUs (OTUs consisting of only 1 read) from the final OTU tables generated in steps 2 and 3:
 OTU-clustering/python_scripts/run_filter_singleton_otus.py
