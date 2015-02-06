@@ -28,12 +28,12 @@ Datasets
 --------
 
 1. [Read datasets](ftp.microbio.me/pub/supplemental_otu_clustering_datasets.tar.gz)
-2. [Greengenes 13.8](ftp://greengenes.microbio.me/greengenes_release/gg_13_5/gg_13_8_otus.tar.gz) database
-3. [SILVA 111](ftp://ftp.microbio.me/pub/QIIME_nonstandard_referencedb/Silva_111.tgz) database
+2. [Greengenes 13.8](ftp.greengenes.microbio.me/greengenes_release/gg_13_5/gg_13_8_otus.tar.gz) database
+3. [SILVA 111](ftp.microbio.me/pub/QIIME_nonstandard_referencedb/Silva_111.tgz) database
 4. [16S PyNAST template](http://greengenes.lbl.gov/Download/Sequence_Data/Fasta_data_files/core_set_aligned.fasta.imputed)
 5. [18S PyNAST template](ftp.microbio.me/pub/core_Silva119_alignment.fna.gz)
 6. For chimera checking 16S, [the gold database](http://drive5.com/uchime/uchime_download.html)
-7. For chimera checking 18S, the SILVA 97% representative set from SILVA 111 (see above)
+7. For chimera checking 18S, the SILVA 97% representative set from SILVA 111 (see 3)
 
 Scripts
 -------
@@ -47,23 +47,23 @@ OTU-clustering/shell_scripts/simulate_reads.sh
 OTU-clustering/shell_scripts/commands_16S.sh
 3.  Launch all software on 18S datasets:<br/>
 OTU-clustering/shell_scripts/commands_18S.sh
-4.  Remove singleton OTUs (OTUs consisting of only 1 read) from the final OTU tables generated in steps 2 and 3:
+4.  Remove singleton OTUs (OTUs consisting of only 1 read) from the final OTU tables generated in steps 2 and 3:<br/>
 OTU-clustering/python_scripts/run_filter_singleton_otus.py
-5.  Summarize taxonomy using filtered OTU tables:
+5.  Summarize taxonomy using filtered OTU tables:<br/>
 OTU-clustering/python_scripts/run_summarize_taxa.py
-6.  Summarize filtered OTU tables:
+6.  Summarize filtered OTU tables:<br/>
 OTU-clustering/python_scripts/run_summarize_tables.py
-7.  Compute true positive, false positive, false negative, precision, recall, F-measure and FP-chimera, FP-known, FP-other metrics using the summarized taxonomy results:
+7.  Compute true positive, false positive, false negative, precision, recall, F-measure and FP-chimera, FP-known, FP-other metrics using the summarized taxonomy results:<br/>
 OTU-clustering/python_scripts/run_compute_precision_recall.py
-8.  Generate alpha diversity plots:
+8.  Generate alpha diversity plots:<br/>
 OTU-clustering/python_scripts/run_single_rarefaction_and_plot.py
-9.  Generate beta diversity plots:
+9.  Generate beta diversity plots:<br/>
 OTU-clustering/python_scripts/run_beta_diversity_and_procrustes.py
-10. Generate taxonomy comparison tables:
+10. Generate taxonomy comparison tables:<br/>
 OTU-clustering/python_scripts/run_compare_taxa_summaries.py
-11. Generate taxonomy stacked bar plots:
+11. Generate taxonomy stacked bar plots:<br/>
 OTU-clustering/python_scripts/run_generate_taxa_barcharts.py
-12. Plot TP, FP-chimera, FP-known and FP-other results:
+12. Plot TP, FP-chimera, FP-known and FP-other results:<br/>
 OTU-clustering/python_scripts/plot_tp_fp_distribution.py
 
 Citing
