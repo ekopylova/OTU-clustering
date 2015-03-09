@@ -71,18 +71,18 @@ mkdir $output_dir/program_results
 
 # launch software on 16S data
 bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
-												   $gg_taxonomy \
-												   $gold_fp \
-												   $template_fp_bac \
-												   $studies_path_qiime/16S \
-												   $studies_path_uparse/16S \
-												   $output_dir/program_results \
-												   $otu_clustering/param_files/16S \
-												   $otu_clustering/shell_scripts \
-												   $num_threads \
-												   $num_jobs \
-												   $studies \
-												   $qsub_params
+    $gg_taxonomy \
+    $gold_fp \
+    $template_fp_bac \
+    $studies_path_qiime/16S \
+    $studies_path_uparse/16S \
+    $output_dir/program_results \
+    $otu_clustering/param_files/16S \
+    $otu_clustering/shell_scripts \
+    $num_threads \
+    $num_jobs \
+    $studies \
+    $qsub_params
 
 # launch software on 18S data
 #bash $otu_clustering/shell_scripts/commands_18S.sh $silva_reference \
