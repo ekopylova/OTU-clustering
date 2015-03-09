@@ -1,0 +1,8 @@
+pick_otus:otu_picking_method sortmerna
+pick_otus:threads 10
+pick_otus:sortmerna_db /scratch/Users/evko1434/index/97_otus
+
+assign_taxonomy:id_to_taxonomy_fp /scratch/Users/evko1434/reference/gg_13_8_otus/taxonomy/97_otu_taxonomy.txt
+assign_taxonomy:reference_seqs_fp /scratch/Users/evko1434/reference/gg_13_8_otus/rep_set/97_otus.fasta
+assign_taxonomy:assignment_method rdp
+assign_taxonomy:rdp_max_memory 4000
