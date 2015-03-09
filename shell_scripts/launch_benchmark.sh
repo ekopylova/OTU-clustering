@@ -39,8 +39,8 @@ num_threads=10
 num_jobs=1
 
 # list of studies to analyze
-#studies=(even staggered 1685 1686 1688 449 632)
-studies=(staggered)
+#studies="even staggered 1685 1686 1688 449 632"
+studies="staggered"
 
 # qsub params
 qsub_params="-k oe -q long8gb -l nodes=1:ppn=$num_threads -l walltime=120:00:00"

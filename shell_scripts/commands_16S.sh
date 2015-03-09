@@ -35,16 +35,16 @@ param_dir=$8
 u=$9
 
 # Number of threads per job
-procs=$10
+procs=${10}
 
 # Number of jobs 
-num_jobs=$11
+num_jobs=${11}
 
 # list of studies to analyze
-studies=$12
+studies=(${12})
 
 # qsub parameters
-qsub_params=$13
+qsub_params=${13}
 
 
 mkdir $output_dir/16S
