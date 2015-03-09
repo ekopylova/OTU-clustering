@@ -64,31 +64,35 @@ if __name__ == '__main__':
             for tool in tools[method]:
                 # ex. 1685
                 for study in studies[datatype]:
-                    search_dir = os.path.join(rootdir, datatype, method, "%s_%s" % (tool, study))
-                    if os.path.isfile(os.path.join(search_dir, "otu_table.biom")):
-                        outdir = os.path.join(outdir_root, datatype, method, "%s_%s" % (tool, study))
-                        if not os.path.exists(outdir):
-                            os.makedirs(outdir)
+                  if method == "open_ref":
+                      biom_table = "otu_table_mc2_w_tax_no_pynast_failures.biom"
+                  else:
+                      biom_table = "otu_table.biom"
+                  search_dir = os.path.join(rootdir, datatype, method, "%s_%s" % (tool, study))
+                  if os.path.isfile(os.path.join(search_dir, biom_table)):
+                      outdir = os.path.join(outdir_root, datatype, method, "%s_%s" % (tool, study))
+                      if not os.path.exists(outdir):
+                          os.makedirs(outdir)
 
-                            # run QIIME's filter_otus_from_otu_table.py script
-                            filter_otus_from_otu_table_command = ["filter_otus_from_otu_table.py",
-                                                                  "-i",
-                                                                  os.path.join(search_dir, "otu_table.biom"),
-                                                                  "-o",
-                                                                  os.path.join(outdir, "otu_table_mc2.biom"),
-                                                                  "--min_count",
-                                                                  "2"]
-                            #print "command = ", filter_otus_from_otu_table_command
-                            proc = Popen(filter_otus_from_otu_table_command,
-                                         stdout=PIPE,
-                                         stderr=PIPE,
-                                         close_fds=True)
-                            proc.wait()
-                            stdout, stderr = proc.communicate()
-                            if stderr:
-                                print stderr
-                    else:
-                        print "%s does not exist" % os.path.join(search_dir, "otu_table.biom")
+                          # run QIIME's filter_otus_from_otu_table.py script
+                          filter_otus_from_otu_table_command = ["filter_otus_from_otu_table.py",
+                                                                "-i",
+                                                                os.path.join(search_dir, biom_table),
+                                                                "-o",
+                                                                os.path.join(outdir, "otu_table_mc2.biom"),
+                                                                "--min_count",
+                                                                "2"]
+                          #print "command = ", filter_otus_from_otu_table_command
+                          proc = Popen(filter_otus_from_otu_table_command,
+                                       stdout=PIPE,
+                                       stderr=PIPE,
+                                       close_fds=True)
+                          proc.wait()
+                          stdout, stderr = proc.communicate()
+                          if stderr:
+                              print stderr
+                  else:
+                      print "%s does not exist" % os.path.join(search_dir, biom_table)
 
 
         

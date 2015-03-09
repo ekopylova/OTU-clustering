@@ -17,7 +17,7 @@ and coverage and FP-other (taxa fully comprising of OTUs mapping
 to BLAST's NT database with <97% id and coverage.
 
 Dependencies: QIIME 1.9.0, BIOM-format >=2.1.3, <2.2.0, BLAST 2.2.29+,
-              USEARCH Uchime (7.0.1090)
+              Blast NT database indexed, USEARCH Uchime (7.0.1090)
 usage:        python run_compute_precision_recall.py [16S, 18S] study \
               taxonomy_level expected_taxa.txt
 """
@@ -32,37 +32,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import brewer2mpl
 
-# software results directory
-results_dir = "/scratch/Users/evko1434/working_dir/program_results"
-
-# summarized taxonomies directory
-# (same outdir_root path as in run_summarize_taxa.py)
-summarize_taxa_dir = "/scratch/Users/evko1434/working_dir/summarize_taxa_mc2"
-
-# summarized BIOM tables to determine number of OTUs
-# (same outdir_root path as in run_summarize_tables.py)
-summarize_tables_dir = "/scratch/Users/evko1434/working_dir/summarize_tables_mc2"
-
-# original BIOM tables excl. singletons directory
-# (same outdir_root path as in run_filter_singleton_otus.py)
-filter_otus_dir = "/scratch/Users/evko1434/working_dir/otu_tables_mc2"
-
-# output directory
-tmp_dir = "/scratch/Users/evko1434/working_dir/compute_precision_recall_results"
-
-# chimera database for 18S
-chimera_db_18S = "/scratch/Users/evko1434/Silva_111_post/rep_set/97_Silva_111_rep_set.fasta"
-
-# chimera database for 16S
-chimera_db_16S = "/scratch/Users/evko1434/reference/gold.fa"
-
-# Global variables
-# these lists will contain mean number of reads + stdev for TP, FP-known,
-# FP-other, FP-chimeric groups ex. taxonomy_mean = {"sumaclust": [4,76,21,53],
-# "swarm": [489,2,32,4,3], ..}
-taxonomy_mean = {}
-taxonomy_stdev = {}
-
 
 def graph_abundance_func(true_positive_otus,
                          false_positive_known_otus,
@@ -71,7 +40,10 @@ def graph_abundance_func(true_positive_otus,
                          gene,
                          tool,
                          study,
-                         method):
+                         method,
+                         results_dir,
+                         taxonomy_mean,
+                         taxonomy_stdev):
     '''Function to build taxonomy_mean and taxonomy_stdev dictionaries for
        storing TP, FP-chimeric, FP-known and FP-other mean number of reads
        and stdev. Accessed once per gene/method/tool/study. At the end of main(),
@@ -160,8 +132,19 @@ def graph_abundance_func(true_positive_otus,
     taxonomy_mean[tool].append(np.rint(np.nan_to_num(np.mean(arr, axis=0))))
     taxonomy_stdev[tool].append(np.rint(np.nan_to_num(np.std(arr, axis=0))))
 
+    print "taxonomy_mean = ", taxonomy_mean
+    print "taxonomy_stdev = ", taxonomy_stdev
 
-def compute_fp_other(actual_tax,
+
+def compute_fp_other(results_dir,
+                     tmp_dir,
+                     filter_otus_dir,
+                     chimera_db_18S,
+                     chimera_db_16S,
+                     taxonomy_mean,
+                     taxonomy_stdev,
+                     blast_nt_index,
+                     actual_tax,
                      expected_tax,
                      tool,
                      study,
@@ -301,17 +284,24 @@ def compute_fp_other(actual_tax,
         print stderr
 
     # search for chimeras in all false positive OTUs using UCHIME
+    if gene == "16S":
+        chimera_db = chimera_db_16S
+    elif gene == "18S":
+        chimera_db = chimera_db_18S
+    else:
+        raise ValueError("%s not supported" % gene)
+
     chimeric_otus_fasta = os.path.join(
         tmp_dir, gene, method, "%s_%s_fp_chimeras.fasta" % (tool, study))
     uchime_command = ["usearch70", "-uchime_ref", otus_fasta,
-                      "-db", "/home/evko1434/genomes/gold.fa",
+                      "-db", chimera_db,
                       "-strand", "plus", "-chimeras", chimeric_otus_fasta]
     print "command = ", uchime_command
     proc = Popen(uchime_command, stdout=PIPE, stderr=PIPE, close_fds=True)
     proc.wait()
     stdout, stderr = proc.communicate()
-    if stderr:
-        print stderr
+    #if stderr:
+    #    print stderr
 
     # get list of chimeric OTU ids
     chimeric_ids = []
@@ -365,7 +355,7 @@ def compute_fp_other(actual_tax,
         tmp_dir, gene, method, "%s_%s_fp_non_chimeric.blast" % (tool, study))
     blast_command = ["blastn",
                      "-task", "megablast",
-                     "-db", "/home/evko1434/genomes/blast_databases/nt",
+                     "-db", blast_nt_index,
                      "-query", fp_otus_non_chimeric_fasta,
                      "-out", otus_blast,
                      "-evalue", "1e-5",
@@ -379,7 +369,7 @@ def compute_fp_other(actual_tax,
     if stderr:
         print stderr                
 
-    # parse Blast output to collect OTU ids that mapped with >=97% id and 100% coverage
+    # parse Blast output to collect OTU ids that mapped with >=97% id and 97% coverage
     # to some sequence in the nt database
     contaminants = set()
     with open (otus_blast, "U") as blast_in:
@@ -429,7 +419,8 @@ def compute_fp_other(actual_tax,
         # TP, FP-known, FP-other
         graph_abundance_func(
             true_positive_otus, false_positive_known_otus, false_positive_other_otus, \
-            false_positive_chimeric_otus, gene, tool, study, method)
+            false_positive_chimeric_otus, gene, tool, study, method, \
+            results_dir, taxonomy_mean, taxonomy_stdev)
 
     return fp_chimera, fp_known, fp_other
 
@@ -441,6 +432,32 @@ def main(argv):
        number of OTUs and output the statistics to stdout for
        each method and tool.
     '''
+
+    # software results directory
+    results_dir = "/scratch/Users/evko1434/working_dir/program_results"
+
+    # summarized taxonomies directory
+    # (same outdir_root path as in run_summarize_taxa.py)
+    summarize_taxa_dir = "/scratch/Users/evko1434/working_dir/summarize_taxa_mc2"
+
+    # output directory
+    tmp_dir = "/scratch/Users/evko1434/working_dir/compute_precision_recall_results"
+
+    # chimera database for 18S
+    chimera_db_18S = "/scratch/Users/evko1434/Silva_111_post/rep_set/97_Silva_111_rep_set.fasta"
+
+    # chimera database for 16S
+    chimera_db_16S = "/scratch/Users/evko1434/reference/gold.fa"
+
+    # path to blast NT indexed database
+    blast_nt_index = "/scratch/Users/evko1434/reference/blast_databases"
+
+    # Global variables
+    # these lists will contain mean number of reads + stdev for TP, FP-known,
+    # FP-other, FP-chimeric groups ex. taxonomy_mean = {"sumaclust": [4,76,21,53],
+    # "swarm": [489,2,32,4,3], ..}
+    taxonomy_mean = {}
+    taxonomy_stdev = {}
 
     expected_tax = set()
     methods = ['de_novo', 'closed_ref', 'open_ref']
@@ -525,8 +542,10 @@ def main(argv):
             fp_other = 0
 
             if find_contaminants:
-                fp_chimera, fp_known, fp_other = compute_fp_other(
-                    actual_tax, expected_tax, tool, study, gene, method, tax_level, graph_abundance)
+                fp_chimera, fp_known, fp_other = compute_fp_other(results_dir, tmp_dir,
+                    filter_otus_dir, chimera_db_18S, chimera_db_16S, taxonomy_mean, taxonomy_stdev,
+                    blast_nt_index, actual_tax, expected_tax, tool, study, gene,
+                    method, tax_level, graph_abundance)
 
             tp = len(actual_tax & expected_tax)
             fp = len(actual_tax - expected_tax)
@@ -557,3 +576,4 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
+
