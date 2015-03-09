@@ -12,7 +12,7 @@ reference_taxonomy=$7 # for parallel_assign_taxonomy_rdp.py
 study=$8
 template_str=$9
 q=${10}
-declare -A uparse_trimlen=( ["1688"]="150" ["1686"]="150" ["1685"]="250" ["449"]="250" ["even_qual"]="150" ["uneven_qual"]="150" ["nematodes"]="250" ["632"]="100" ["2107"]="150" ["1919"]="250")
+declare -A uparse_trimlen=( ["1688"]="150" ["1686"]="150" ["1685"]="250" ["449"]="250" ["even"]="150" ["staggered"]="150" ["nematodes"]="250" ["632"]="100" ["2107"]="150" ["1919"]="250")
 
 mkdir $output_dir
 

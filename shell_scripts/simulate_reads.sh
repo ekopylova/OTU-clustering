@@ -8,29 +8,20 @@
 # date        : 24 Nov 2014
 # author      : Evguenia Kopylova (jenya.kopylov@gmail.com)
 
-########### EDIT PATHS #############
-
-# root dir
-home_dir=/scratch/Users/evko1434
-
 # directory to store all output
-output_dir=$home_dir/simulate_reads_results
+output_dir=$1
 
 # Greengenes 97% OTU aligned database
-gg_db=$home_dir/reference/gg_13_8_otus/rep_set_aligned/97_otus.fasta
+gg_db=$2
 
 # Greengenes 97% OTU taxonomy
-gg_taxonomy=$home_dir/reference/gg_13_8_otus/taxonomy/97_otu_taxonomy.txt
+gg_taxonomy=$3
 
-# root directory "OTU-clustering" containing "python_scripts, shell_scripts and mapping_files"
-root_dir=$home_dir/OTU-clustering
+# root directory "OTU-clustering" containing "python_scripts, shell_scripts and param_files"
+otu_clustering=$4
 
-####################################
-
-python_scripts_dir=$root_dir/python_scripts
-dependency_material_dir=$root_dir/mapping_files
-
-mkdir $output_dir
+python_scripts_dir=$otu_clustering/python_scripts
+dependency_material_dir=$otu_clustering/mapping_files
 
 # Slice out V4 region from 16S rRNA (Greengenes 97% OTUs database)
 # using primers 515F/806R (Caporaso JG et al., ISME J., 2012)
