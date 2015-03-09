@@ -82,7 +82,7 @@ do
     # Run with USEARCH52
     echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_closed_dir/usearch_$i -t $gg_tax -p $param_dir/CR_usearch_params.txt -s -a -O $num_jobs" | qsub -N 16CR_US_$i $qsub_params; sleep 2
     # Run with USEARCH61
-    echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_closed_dir/usearch61_$i -t $gg_tax -p $param_dir/CR_usearch61_params_449.txt -s -a -O $num_jobs" | qsub -N 16CR_US61_$i $qsub_params; sleep 2
+    echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_closed_dir/usearch61_$i -t $gg_tax -p $param_dir/CR_usearch61_params.txt -s -a -O $num_jobs" | qsub -N 16CR_US61_$i $qsub_params; sleep 2
 done
 
 # Run open-reference OTU picking on all the studies
@@ -94,8 +94,6 @@ do
     echo "pick_open_reference_otus.py -m sortmerna_sumaclust -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_open_dir/sortmerna_sumaclust_$i -p $param_dir/OR_sortmerna_sumaclust_params.txt -a -O $num_jobs" | qsub -N 16OR_SMR_SC_$i $qsub_params; sleep 2
     # Run with UCLUST
     echo "pick_open_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_open_dir/uclust_$i -p $param_dir/OR_params.txt -a -O $num_jobs" | qsub -N 16OR_UC_$i $qsub_params; sleep 2
-    # Run with USEARCH61 (even and staggered datasets)
-    echo "pick_open_reference_otus.py -m usearch61 -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_open_dir/usearch61_$i -p $param_dir/OR_params.txt -a -O $num_jobs" | qsub -N 16OR_US61_$i $qsub_params; sleep 2
     # Run with USEARCH61
     echo "pick_open_reference_otus.py -m usearch61 -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_open_dir/usearch61_$i -p $param_dir/OR_params.txt -a -O $num_jobs" | qsub -N 16OR_US61_$i $qsub_params; sleep 2
 done
