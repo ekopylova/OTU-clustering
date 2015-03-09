@@ -20,8 +20,11 @@ gg_taxonomy=$3
 # root directory "OTU-clustering" containing "python_scripts, shell_scripts and param_files"
 otu_clustering=$4
 
+# mapping file
+mapping_files=$5
+
 python_scripts_dir=$otu_clustering/python_scripts
-mapping_files=$otu_clustering/mapping_files
+
 
 # Slice out V4 region from 16S rRNA (Greengenes 97% OTUs database)
 # using primers 515F/806R (Caporaso JG et al., ISME J., 2012)

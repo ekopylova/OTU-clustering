@@ -44,6 +44,7 @@ studies="staggered"
 
 # qsub params
 qsub_params="-k oe -q long8gb -l nodes=1:ppn=$num_threads -l walltime=120:00:00"
+
 ###########################################
 
 
@@ -68,7 +69,7 @@ mkdir $output_dir/program_results
 
 # simulate even / staggered reads 
 mkdir $output_dir/simulated_reads
-bash $otu_clustering/simulated_reads.sh $output_dir/simulated_reads $gg_reference $gg_taxonomy $otu_clustering $datasets/mapping_files
+bash $otu_clustering/shell_scripts/simulate_reads.sh $output_dir/simulated_reads $gg_reference $gg_taxonomy $otu_clustering $datasets/mapping_files
 
 # launch software on 16S data
 bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
@@ -99,4 +100,8 @@ bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
 #												   $num_jobs \
 #												   ${studies} \
 #												   ${qsub_params}
+
+# remove singleton OTUs (OTUs comprising of only 1 read) from the final OTU tables
+#mkdir $output_dir/run_filter_singleton_otus
+#python $otu_clustering/python_scripts/run_filter_singleton_otus.py $output_dir/program_results $output_dir/run_filter_singleton_otus
 
