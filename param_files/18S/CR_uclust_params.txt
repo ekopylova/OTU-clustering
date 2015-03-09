@@ -1,0 +1,7 @@
+pick_otus:otu_picking_method uclust_ref
+
+align_seqs:template_fp /scratch/Users/evko1434/reference/core_Silva119_alignment.fna
+assign_taxonomy:id_to_taxonomy_fp /home/evko1434/genomes/Silva_111_post/taxonomy/97_Silva_111_taxa_map_RDP_6_levels.txt
+assign_taxonomy:reference_seqs_fp /scratch/Users/evko1434/reference/Silva_111_post/rep_set/97_Silva_111_rep_set.fasta
+assign_taxonomy:assignment_method rdp
+assign_taxonomy:rdp_max_memory 4000
