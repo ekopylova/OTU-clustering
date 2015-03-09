@@ -21,7 +21,7 @@ gg_taxonomy=$3
 otu_clustering=$4
 
 python_scripts_dir=$otu_clustering/python_scripts
-dependency_material_dir=$otu_clustering/mapping_files
+mapping_files=$otu_clustering/mapping_files
 
 # Slice out V4 region from 16S rRNA (Greengenes 97% OTUs database)
 # using primers 515F/806R (Caporaso JG et al., ISME J., 2012)
@@ -39,12 +39,12 @@ art_illumina -amp -sam -na -i $output_dir/subsampled_species.fna \
 
 # Quality filter using QIIME's split_library_fastq
 split_libraries_fastq.py -i $output_dir/art_even.fq \
-    -m $dependency_material_dir/even_uneven_mapping_file.txt -o $output_dir/split_libraries_even \
+    -m $mapping_files/even_uneven_mapping_file.txt -o $output_dir/split_libraries_even \
     --barcode_type="not-barcoded" --sample_id s1
 
 # Split libraries for UPARSE (even)
 split_libraries_fastq.py -i $output_dir/art_even.fq \
-    -m $dependency_material_dir/even_uneven_mapping_file.txt --store_demultiplexed_fastq -r 1000 \
+    -m $mapping_files/even_uneven_mapping_file.txt --store_demultiplexed_fastq -r 1000 \
     -n 1000 -p 0.0001 --barcode_type="not-barcoded" -o $output_dir/split_libraries_even_for_uparse \
     --sample_ids s1
 
@@ -73,13 +73,13 @@ art_illumina -amp -sam -na -i $output_dir/subsampled_species_staggered.fasta \
 
 # Quality filter staggered reads using QIIME's split_library_fastq
 split_libraries_fastq.py -i $output_dir/art_staggered.fq \
-    -m $dependency_material_dir/even_uneven_mapping_file.txt \
+    -m $mapping_files/even_uneven_mapping_file.txt \
     -o $output_dir/split_libraries_staggered --barcode_type="not-barcoded" \
     --sample_id s1
 
 # Split libraries for UPARSE (staggered)
 split_libraries_fastq.py -i $output_dir/art_staggered.fq \
-    -m $dependency_material_dir/even_uneven_mapping_file.txt --store_demultiplexed_fastq \
+    -m $mapping_files/even_uneven_mapping_file.txt --store_demultiplexed_fastq \
     -r 1000 -n 1000 -p 0.0001 --barcode_type="not-barcoded" \
     -o $output_dir/split_libraries_staggered_for_uparse --sample_ids s1
 
