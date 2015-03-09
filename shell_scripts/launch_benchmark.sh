@@ -39,7 +39,8 @@ num_threads=10
 num_jobs=1
 
 # list of studies to analyze
-studies=(even staggered 1685 1686 1688 449 632)
+#studies=(even staggered 1685 1686 1688 449 632)
+studies=(staggered)
 
 # qsub params
 qsub_params="-k oe -q long8gb -l nodes=1:ppn=$num_threads -l walltime=120:00:00"
@@ -65,6 +66,9 @@ studies_path_uparse=$datasets/UPARSE_not_filtered_QIIME_label_format
 mkdir $output_dir
 mkdir $output_dir/program_results
 
+# simulate even / staggered reads 
+
+
 # launch software on 16S data
 bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
 												   $gg_taxonomy \
@@ -81,17 +85,17 @@ bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
 												   $qsub_params
 
 # launch software on 18S data
-bash $otu_clustering/shell_scripts/commands_18S.sh $silva_reference \
-												   $silva_taxonomy \
-												   $silva_reference \
-												   $template_fp_euk \
-												   $studies_path_qiime/18S \
-												   $studies_path_uparse/18S \
-												   $output_dir/program_results \
-												   $otu_clustering/param_files/18S \
-												   $otu_clustering/shell_scripts \
-												   $num_threads \
-												   $num_jobs \
-												   $studies \
-												   $qsub_params
+#bash $otu_clustering/shell_scripts/commands_18S.sh $silva_reference \
+#												   $silva_taxonomy \
+#												   $silva_reference \
+#												   $template_fp_euk \
+#												   $studies_path_qiime/18S \
+#												   $studies_path_uparse/18S \
+#												   $output_dir/program_results \
+#												   $otu_clustering/param_files/18S \
+#												   $otu_clustering/shell_scripts \
+#												   $num_threads \
+#												   $num_jobs \
+#												   $studies \
+#												   $qsub_params
 

@@ -50,7 +50,7 @@ qsub_params=$13
 mkdir $output_dir/16S
 
 # Run de-novo OTU picking on all the studies
-out_denovo_dir=$output_dir/de_novo
+out_denovo_dir=$output_dir/16S/de_novo
 mkdir $out_denovo_dir
 for i in ${studies[@]}
 do
@@ -71,7 +71,7 @@ do
 done
 
 # Run closed-reference OTU picking on all the studies
-out_closed_dir=$output_dir/closed_ref
+out_closed_dir=$output_dir/16S/closed_ref
 mkdir $out_closed_dir
 for i in ${studies[@]}
 do
@@ -86,7 +86,7 @@ do
 done
 
 # Run open-reference OTU picking on all the studies
-out_open_dir=$output_dir/open_ref
+out_open_dir=$output_dir/16S/open_ref
 mkdir $out_open_dir
 for i in ${studies[@]}
 do
