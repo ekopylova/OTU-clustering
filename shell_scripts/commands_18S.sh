@@ -43,7 +43,7 @@ num_jobs=${11}
 studies=(${12})
 
 # qsub parameters
-qsub_params=${13}
+qsub_params="${13}"
 
 
 mkdir $output_dir/18S

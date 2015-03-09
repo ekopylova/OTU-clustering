@@ -81,8 +81,8 @@ bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
     $otu_clustering/shell_scripts \
     $num_threads \
     $num_jobs \
-    $studies \
-    $qsub_params
+    "\${studies}" \
+    "\${qsub_params}"
 
 # launch software on 18S data
 #bash $otu_clustering/shell_scripts/commands_18S.sh $silva_reference \
@@ -96,6 +96,6 @@ bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
 #												   $otu_clustering/shell_scripts \
 #												   $num_threads \
 #												   $num_jobs \
-#												   $studies \
-#												   $qsub_params
+#												   $\${studies} \
+#												   $\${qsub_params}
 
