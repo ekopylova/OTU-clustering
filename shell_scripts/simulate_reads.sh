@@ -43,13 +43,13 @@ art_illumina -amp -sam -na -i $output_dir/subsampled_species.fna \
 # Quality filter using QIIME's split_library_fastq
 split_libraries_fastq.py -i $output_dir/art_even.fq \
     -m $mapping_files/even_uneven_mapping_file.txt -o $output_dir/split_libraries_even \
-    --barcode_type="not-barcoded" --sample_id s1
+    --barcode_type="not-barcoded" --sample_id s1 --phred_offset 33
 
 # Split libraries for UPARSE (even)
 split_libraries_fastq.py -i $output_dir/art_even.fq \
     -m $mapping_files/even_uneven_mapping_file.txt --store_demultiplexed_fastq -r 1000 \
     -n 1000 -p 0.0001 --barcode_type="not-barcoded" -o $output_dir/split_libraries_even_for_uparse \
-    --sample_ids s1
+    --sample_ids s1 --phred_offset 33
 
 # Generate ground-truth OTU-map from even FASTA file
 # (split libraries ran on art_even.fq for UPARSE was to put
@@ -78,13 +78,14 @@ art_illumina -amp -sam -na -i $output_dir/subsampled_species_staggered.fasta \
 split_libraries_fastq.py -i $output_dir/art_staggered.fq \
     -m $mapping_files/even_uneven_mapping_file.txt \
     -o $output_dir/split_libraries_staggered --barcode_type="not-barcoded" \
-    --sample_id s1
+    --sample_id s1 --phred_offset 33
 
 # Split libraries for UPARSE (staggered)
 split_libraries_fastq.py -i $output_dir/art_staggered.fq \
     -m $mapping_files/even_uneven_mapping_file.txt --store_demultiplexed_fastq \
     -r 1000 -n 1000 -p 0.0001 --barcode_type="not-barcoded" \
-    -o $output_dir/split_libraries_staggered_for_uparse --sample_ids s1
+    -o $output_dir/split_libraries_staggered_for_uparse --sample_ids s1 \
+    --phred_offset 33
 
 # Generate ground-truth OTU-map from staggered FASTA file
 python $python_scripts_dir/art_fasta_qiime_labels_to_otumap.py \
