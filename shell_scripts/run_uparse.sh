@@ -1,4 +1,6 @@
-# usage run_usearch7_denovo.sh reads.fna output_dir chimera_db.fasta num_threads num_jobs_to_start reference_db.fasta reference_db_taxonomy.txt study_id pynast_template_fp q_value
+# usage run_usearch7_denovo.sh reads.fna output_dir chimera_db.fasta num_threads num_jobs_to_start \
+#                              reference_db.fasta reference_db_taxonomy.txt study_id pynast_template_fp \
+#                              q_value python_scripts_dir
 # for 16S, db.fasta should be cs_gold.fa (downloaded from http://www.drive5.com/usearch/manual/uchime_ref.html)
 
 u="usearch70"         # name of usearch executable
@@ -12,6 +14,7 @@ reference_taxonomy=$7 # for parallel_assign_taxonomy_rdp.py
 study=$8
 template_str=$9
 q=${10}
+otu_clustering_scripts=${11}
 declare -A uparse_trimlen=( ["1688"]="150" ["1686"]="150" ["1685"]="250" ["449"]="250" ["even"]="150" ["staggered"]="150" ["nematodes"]="250" ["632"]="100" ["2107"]="150" ["1919"]="250")
 
 mkdir $output_dir
@@ -42,7 +45,7 @@ $u -usearch_global $output_dir/reads.fa -db $output_dir/otus.fa -strand both \
 -id 0.97 -threads $threads -uc $output_dir/map.uc
 
 # Create OTU map
-python /home/evko1434/scripts/get_otu_map_usearch_ref.py -i $output_dir/map.uc > $output_dir/seqs_otus.txt
+python $otu_clustering_scripts/get_otu_map_usearch_ref.py -i $output_dir/map.uc > $output_dir/seqs_otus.txt
 
 # Assign taxonomy
 echo "parallel_assign_taxonomy_rdp.py"

@@ -31,20 +31,23 @@ output_dir=$7
 # Define the parameter folder
 param_dir=$8
 
-# UPARSE script (run_uparse.sh)
-u=$9
+# OTU-clustering shell scripts
+shell_scripts=$9
+
+# OTU-clustering python scripts
+python_scripts=${10}
 
 # Number of threads per job
-procs=${10}
+procs=${11}
 
 # Number of jobs 
-num_jobs=${11}
+num_jobs=${12}
 
 # list of studies to analyze
-studies=(${12})
+studies=(${13})
 
 # qsub parameters
-qsub_params="${13}"
+qsub_params="${14}"
 
 
 mkdir $output_dir/16S
@@ -65,9 +68,9 @@ do
     # Run with USEARCH52 - no chimera detection
     echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/usearch_$i -a -O $num_jobs -p $param_dir/DN_usearch_params.txt" | qsub -N 16DN_US_$i $qsub_params; sleep 2
     # Run UPARSE q16  
-    echo "bash $u/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q16_${i} $gold_fp $procs $num_jobs $gg_rep_set $gg_tax $i $template_fp 16" | qsub -N 16DN_UP16_$i $qsub_params; sleep 2
+    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q16_${i} $gold_fp $procs $num_jobs $gg_rep_set $gg_tax $i $template_fp 16 $python_scripts" | qsub -N 16DN_UP16_$i $qsub_params; sleep 2
     # Run UPARSE q3
-    echo "bash $u/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q3_${i} $gold_fp $procs $num_jobs $gg_rep_set $gg_tax $i $template_fp 3" | qsub -N 16DN_UP3_$i $qsub_params; sleep 2
+    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q3_${i} $gold_fp $procs $num_jobs $gg_rep_set $gg_tax $i $template_fp 3 $python_scripts" | qsub -N 16DN_UP3_$i $qsub_params; sleep 2
 done
 
 # Run closed-reference OTU picking on all the studies

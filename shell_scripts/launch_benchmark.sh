@@ -81,6 +81,7 @@ bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
     $output_dir/program_results \
     $otu_clustering/param_files/16S \
     $otu_clustering/shell_scripts \
+    $otu_clustering/python_scripts \
     $num_threads \
     $num_jobs \
     "${studies}" \
