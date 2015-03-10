@@ -36,10 +36,37 @@ if __name__ == '__main__':
     #                                /(output from OTU-picking)
     #                     /sumaclust_1685/
     #                     ..
-    rootdir = "/scratch/Users/evko1434/working_dir/program_results"
+    rootdir = sys.argv[1]
 
     # output results directory
-    outdir_root = "/scratch/Users/evko1434/working_dir/otu_tables_mc2"
+    outdir_root = sys.argv[2]
+
+    # studies 16S
+    studies_bac = sys.argv[3].split()
+
+    # studies 18S
+    studies_euk = sys.argv[4].split()
+
+    # list of studies for each gene type
+    studies = {'16S': [], '18S': []}
+
+    for study in studies_bac:
+      if study not in studies['16S']:
+        studies['16S'].append(study)
+
+    for study in studies_euk:
+      if study not in studies['18S']:
+        studies['18S'].append(study)
+
+    print "studies = ", studies
+
+    # tools
+    tools_list = sys.argv[5].split('; ')
+
+    print "tools_list = ", tools_list
+
+    # list of tools for each OTU picking method
+    tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
 
     # genes 
     datatypes = ['16S', '18S']
@@ -47,14 +74,12 @@ if __name__ == '__main__':
     # OTU picking methods
     picking = ['de_novo', 'closed_ref', 'open_ref']
 
-    # list of studies for each gene type
-    studies = {'16S': ['1685', '1686', '1688', '449', '632', 'even', 'staggered'],
-               '18S': ['2107', 'nematodes']}
-
     # list of tools for each OTU picking method
-    tools = {'de_novo': ['uclust', 'usearch', 'usearch61', 'swarm', 'sumaclust', 'uparse_q3', 'uparse_q16'],
-             'closed_ref': ['sortmerna', 'uclust', 'usearch61', 'usearch'],
-             'open_ref': ['sortmerna_sumaclust', 'uclust', 'usearch61']}
+    #tools = {'de_novo': ['uclust', 'usearch', 'usearch61', 'swarm', 'sumaclust', 'uparse_q3', 'uparse_q16'],
+    #         'closed_ref': ['sortmerna', 'uclust', 'usearch61', 'usearch'],
+    #         'open_ref': ['sortmerna_sumaclust', 'uclust', 'usearch61']}
+
+    exit()
 
     # ex. 16S
     for datatype in datatypes:
@@ -92,7 +117,7 @@ if __name__ == '__main__':
                           if stderr:
                               print stderr
                   else:
-                      print "%s does not exist" % os.path.join(search_dir, biom_table)
+                      print "skipping %s: does not exist" % os.path.join(search_dir, biom_table)
 
 
         

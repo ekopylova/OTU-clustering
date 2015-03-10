@@ -38,13 +38,19 @@ num_threads=10
 # number of jobs to launch
 num_jobs=1
 
-# list of 16S studies to analyze
+# list of 16S studies to analyze (each study must be separated by a space)
 #studies="even staggered 1685 1686 1688 449 632"
 studies_bac="staggered"
 
-# list of 18S studies to analyze
+# list of 18S studies to analyze (each study must be separated by a space)
 #studies_euk="nematodes 2107"
 studies_euk="nematodes"
+
+# list of tools (this list will only be used in all subsequent scripts after
+# commands_16.sh and commands_18.sh, if the user updates either of these two
+# files to include other tools for benchmarks, the list below should be updated
+# as well)
+tools="de_novo: uclust,usearch,usearch61,swarm,sumaclust,uparse_q3,uparse_q16; closed_ref: sortmerna,uclust,usearch61,usearch; open_ref: sortmerna_sumaclust,uclust,usearch61"
 
 # qsub params
 qsub_params="-k oe -q long8gb -l nodes=1:ppn=$num_threads -l walltime=120:00:00"
@@ -92,22 +98,22 @@ mkdir $output_dir/program_results
 #    "${qsub_params}"
 
 # launch software on 18S data
-bash $otu_clustering/shell_scripts/commands_18S.sh $silva_reference \
-    $silva_taxonomy \
-    $silva_reference \
-    $template_fp_euk \
-    $studies_path_qiime/18S \
-    $studies_path_uparse/18S \
-    $output_dir/program_results \
-    $otu_clustering/param_files/18S \
-    $otu_clustering/shell_scripts \
-    $otu_clustering/python_scripts \
-    $num_threads \
-    $num_jobs \
-    "${studies_euk}" \
-    "${qsub_params}"
+#bash $otu_clustering/shell_scripts/commands_18S.sh $silva_reference \
+#    $silva_taxonomy \
+#    $silva_reference \
+#    $template_fp_euk \
+#    $studies_path_qiime/18S \
+#    $studies_path_uparse/18S \
+#    $output_dir/program_results \
+#    $otu_clustering/param_files/18S \
+#    $otu_clustering/shell_scripts \
+#    $otu_clustering/python_scripts \
+#    $num_threads \
+#    $num_jobs \
+#    "${studies_euk}" \
+#    "${qsub_params}"
 
 # remove singleton OTUs (OTUs comprising of only 1 read) from the final OTU tables
-#mkdir $output_dir/run_filter_singleton_otus
-#python $otu_clustering/python_scripts/run_filter_singleton_otus.py $output_dir/program_results $output_dir/run_filter_singleton_otus
+mkdir $output_dir/run_filter_singleton_otus
+python $otu_clustering/python_scripts/run_filter_singleton_otus.py $output_dir/program_results $output_dir/run_filter_singleton_otus "${studies_bac}" "${studies_euk}" "${tools}"
 

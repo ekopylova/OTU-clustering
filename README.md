@@ -2,6 +2,8 @@ OTU-clustering
 ==============
 
 Scripts for benchmarking and comparison of short read OTU clustering tools available via QIIME 1.9.
+The full benchmark can be launched with the command `launch_benchmark.sh` in `OTU-clustering/shell_scripts/`.
+This script will execute all of the software tools & perform analysis using the datasets & scripts below. 
 
 Dependencies
 ------------
@@ -27,11 +29,11 @@ Install
 Datasets
 --------
 
-1. [Read datasets](ftp.microbio.me/pub/supplemental_otu_clustering_datasets.tar.gz)
-2. [Greengenes 13.8](ftp.greengenes.microbio.me/greengenes_release/gg_13_5/gg_13_8_otus.tar.gz) database
-3. [SILVA 111](ftp.microbio.me/pub/QIIME_nonstandard_referencedb/Silva_111.tgz) database
+1. [Read datasets](ftp://ftp.microbio.me/pub/supplemental_otu_clustering_datasets.tar.gz)
+2. [Greengenes 13.8](ftp://ftp.greengenes.microbio.me/greengenes_release/gg_13_5/gg_13_8_otus.tar.gz) database
+3. [SILVA 111](ftp://ftp.microbio.me/pub/QIIME_nonstandard_referencedb/Silva_111.tgz) database
 4. [16S PyNAST template](http://greengenes.lbl.gov/Download/Sequence_Data/Fasta_data_files/core_set_aligned.fasta.imputed)
-5. [18S PyNAST template](ftp.microbio.me/pub/core_Silva119_alignment.fna.gz)
+5. [18S PyNAST template](ftp://ftp.microbio.me/pub/core_Silva119_alignment.fna.gz)
 6. For chimera checking 16S, [the gold database](http://drive5.com/uchime/uchime_download.html)
 7. For chimera checking 18S, the SILVA 97% representative set from SILVA 111 (see 3)
 
