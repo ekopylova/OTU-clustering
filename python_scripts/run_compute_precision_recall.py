@@ -448,27 +448,30 @@ def main(argv):
     #
     results_dir = sys.argv[1]
 
+    # final OTU tables without singleton OTUs
+    filter_otus_dir = sys.argv[2]
+
     # summarized taxonomies directory
     # (same outdir_root path as in run_summarize_taxa.py)
-    summarize_taxa_dir = sys.argv[2]
+    summarize_taxa_dir = sys.argv[3]
 
     # output directory
-    out_dir = sys.argv[3]
+    out_dir = sys.argv[4]
 
     # chimera database for 18S
-    chimera_db_18S = sys.argv[4]
+    chimera_db_18S = sys.argv[5]
 
     # chimera database for 16S
-    chimera_db_16S = sys.argv[5]
+    chimera_db_16S = sys.argv[6]
 
     # path to blast NT indexed database
-    blast_nt_index = sys.argv[6]
+    blast_nt_index = sys.argv[7]
 
     # studies 16S
-    studies_bac = sys.argv[7].split()
+    studies_bac = sys.argv[8].split()
 
     # studies 18S
-    studies_euk = sys.argv[8].split()
+    studies_euk = sys.argv[9].split()
 
     # list of studies for each gene type
     studies = {'16S': [], '18S': []}
@@ -482,9 +485,9 @@ def main(argv):
         studies['18S'].append(study)
 
     # tools
-    tools_denovo = sys.argv[9].split()
-    tools_closed_ref = sys.argv[10].split()
-    tools_open_ref = sys.argv[11].split()
+    tools_denovo = sys.argv[10].split()
+    tools_closed_ref = sys.argv[11].split()
+    tools_open_ref = sys.argv[12].split()
 
     # list of tools for each OTU picking method
     tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
@@ -500,7 +503,7 @@ def main(argv):
         tools['open_ref'].append(tool)
 
     # filepath to expected summarized taxonomies
-    expected_fp = sys.argv[12]
+    expected_fp = sys.argv[13]
 
     # OTU-picking methods
     methods = ['de_novo', 'closed_ref', 'open_ref']

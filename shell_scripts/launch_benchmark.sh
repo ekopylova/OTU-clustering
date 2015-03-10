@@ -156,7 +156,7 @@ mkdir $output_dir/program_results
 # taxonomy results
 mkdir $output_dir/run_compute_precision_recall
 python $otu_clustering/python_scripts/run_compute_precision_recall.py \
-    $output_dir/program_results $output_dir/run_summarize_taxa \
+    $output_dir/program_results $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
     $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
     $blast_nt "${simulated_mock_studies_bac}" "${simulated_mock_studies_euk}" \
     "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
