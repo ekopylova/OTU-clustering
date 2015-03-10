@@ -28,30 +28,50 @@ if __name__ == '__main__':
 
     # original BIOM tables excl. singletons directory
     # (same outdir_root path as in run_filter_singleton_otus.py)
-    rootdir = "/scratch/Users/evko1434/working_dir/otu_tables_mc2"
+    rootdir = sys.argv[1]
 
     # output results directory 
-    outdir_root = "/scratch/Users/evko1434/working_dir/summarize_tables_mc2"
+    outdir_root = sys.argv[2]
+
+    # list of studies for each gene type
+    studies = {'16S': [], '18S': []}
+
+    for study in studies_bac:
+      if study not in studies['16S']:
+        studies['16S'].append(study)
+
+    for study in studies_euk:
+      if study not in studies['18S']:
+        studies['18S'].append(study)
+
+    # tools
+    tools_denovo = sys.argv[5].split()
+    tools_closed_ref = sys.argv[6].split()
+    tools_open_ref = sys.argv[7].split()
+
+    # list of tools for each OTU picking method
+    tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
+
+    for tool in tools_denovo:
+      if tool not in tools['de_novo']:
+        tools['de_novo'].append(tool)
+    for tool in tools_closed_ref:
+      if tool not in tools['closed_ref']:
+        tools['closed_ref'].append(tool)
+    for tool in tools_open_ref:
+      if tool not in tools['open_ref']:
+        tools['open_ref'].append(tool)
 
     # genes
     datatypes = ['16S', '18S']
 
     # OTU picking methods
-    picking = ['closed_ref', 'de_novo', 'open_ref']
-
-    # list of studies per gene
-    studies = {'16S': ['even', 'staggered', '1685', '1686', '1688', '449'],
-               '18S': ['nematodes', '2107']}
-
-    # list of tools
-    tools = {'de_novo': ['uclust', 'usearch', 'usearch61', 'swarm', 'sumaclust', 'uparse_q3', 'uparse_q16'],
-             'closed_ref': ['sortmerna', 'uclust', 'usearch', 'usearch61'],
-             'open_ref': ['sortmerna_sumaclust', 'uclust', 'usearch61']}
+    methods = ['closed_ref', 'de_novo', 'open_ref']
 
     # ex. 16S
     for datatype in datatypes:
         # ex. de_novo
-        for method in picking:
+        for method in methods:
             # ex. swarm
             for tool in tools[method]:
                 # ex. 1685
