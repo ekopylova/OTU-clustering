@@ -515,20 +515,20 @@ def main(argv):
 
     # ex. 16S
     for datatype in datatypes:
+        sys.stdout.write("\n%s\n" % datatype)
         # ex. closed_ref
         for method in methods:
-            # ex. swarm
-            for tool in tools[method]:
-                sys.stdout.write("%s\n" % method)
-                # ex. 1685
-                for study in studies[datatype]:
-                    sys.stdout.write("%s\n" % study)
-                    if study == "nematodes":
-                        tax_level = "L5"
-                    else:
-                        tax_level = "L6"
-                    expected_f = os.path.join(expected_fp, study, "%s_%s.txt" % (study, tax_level))
-
+            sys.stdout.write("%s\n" % method)
+            # ex. 1685
+            for study in studies[datatype]:
+                sys.stdout.write("%s\n" % study)
+                if study == "nematodes":
+                    tax_level = "L5"
+                else:
+                    tax_level = "L6"
+                expected_f = os.path.join(expected_fp, study, "%s_%s.txt" % (study, tax_level))
+                # ex. swarm
+                for tool in tools[method]:
                     # these lists will contain mean number of reads + stdev for TP, FP-known,
                     # FP-other, FP-chimeric groups ex. taxonomy_mean = {"sumaclust": [4,76,21,53],
                     # "swarm": [489,2,32,4,3], ..}
@@ -536,11 +536,6 @@ def main(argv):
                     taxonomy_stdev = {}
 
                     expected_tax = set()
-
-                    # do not need to find contaminants for simulated communities
-                    if (study == "even" or study == "staggered"):
-                        find_contaminants = False
-                        graph_abundance = False
 
                     with open(expected_f, 'U') as expected:
                         for line in expected:
