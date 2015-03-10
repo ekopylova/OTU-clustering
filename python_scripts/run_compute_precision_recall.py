@@ -37,7 +37,7 @@ def graph_abundance_func(true_positive_otus,
                          false_positive_known_otus,
                          false_positive_other_otus,
                          false_positive_chimeric_otus,
-                         gene,
+                         datatype,
                          tool,
                          study,
                          method,
@@ -57,16 +57,16 @@ def graph_abundance_func(true_positive_otus,
 
     if (method == "de_novo" and (tool == "uparse_q3" or tool == "uparse_q16")):
             otu_map_f = os.path.join(
-                results_dir, gene, method, "%s_%s" % (tool, study), "seqs_otus.txt")
+                results_dir, datatype, method, "%s_%s" % (tool, study), "seqs_otus.txt")
     elif (method == "closed_ref" and (tool == "uclust" or tool == "usearch" or tool == "usearch61")):
             otu_map_f = os.path.join(
-                results_dir, gene, method, "%s_%s" % (tool, study), "%s_ref_picked_otus" % tool, "seqs_otus.txt")
+                results_dir, datatype, method, "%s_%s" % (tool, study), "%s_ref_picked_otus" % tool, "seqs_otus.txt")
     elif method == "open_ref":
             otu_map_f = os.path.join(
-                results_dir, gene, method, "%s_%s" % (tool, study), "final_otu_map_mc2.txt")
+                results_dir, datatype, method, "%s_%s" % (tool, study), "final_otu_map_mc2.txt")
     else:
         otu_map_f = os.path.join(
-            results_dir, gene, method, "%s_%s" % (tool, study), "%s_picked_otus" % tool, "seqs_otus.txt")
+            results_dir, datatype, method, "%s_%s" % (tool, study), "%s_picked_otus" % tool, "seqs_otus.txt")
 
     # load OTU map into dict
     otu_map_dict = {}
@@ -137,7 +137,7 @@ def graph_abundance_func(true_positive_otus,
 
 
 def compute_fp_other(results_dir,
-                     tmp_dir,
+                     out_dir,
                      filter_otus_dir,
                      chimera_db_18S,
                      chimera_db_16S,
@@ -148,7 +148,7 @@ def compute_fp_other(results_dir,
                      expected_tax,
                      tool,
                      study,
-                     gene,
+                     datatype,
                      method,
                      tax_level,
                      graph_abundance=True):
@@ -183,7 +183,7 @@ def compute_fp_other(results_dir,
     # and all OTU ids that share that taxonomy as values in a list
     otu_table_dict = {}
     biom_table_f = os.path.join(
-        filter_otus_dir, gene, method, "%s_%s" % (tool, study), "otu_table_mc2.biom")
+        filter_otus_dir, datatype, method, "%s_%s" % (tool, study), "otu_table_mc2.biom")
     if not os.path.exists(biom_table_f):
         print "%s does not exist, cannot search for contaminants" % biom_table_f
     else:
@@ -250,7 +250,7 @@ def compute_fp_other(results_dir,
     print "Total true positive otus = ", true_positive_otus_count
 
     # create list file of false positive OTUs
-    fp_otus_ids_f = os.path.join(tmp_dir, gene, method, "%s_%s_fp_ids.txt" % (tool, study))
+    fp_otus_ids_f = os.path.join(out_dir, datatype, method, "%s_%s_fp_ids.txt" % (tool, study))
     with open(fp_otus_ids_f, 'w') as out_file:
         for tax in false_positive_otus:
             for otu in false_positive_otus[tax]:
@@ -259,20 +259,20 @@ def compute_fp_other(results_dir,
     # create FASTA file of false positive OTUs                                                                                                                                                                                                                   
     if method == "closed_ref":
         rep_set_fasta = os.path.join(
-            results_dir, gene, method, "%s_%s" % (tool, study), "rep_set", "seqs_rep_set.fasta")
+            results_dir, datatype, method, "%s_%s" % (tool, study), "rep_set", "seqs_rep_set.fasta")
     elif method == "de_novo":
         if (tool == "uparse_q3" or tool == "uparse_q16"):
             rep_set_fasta = os.path.join(
-                results_dir, gene, method, "%s_%s" % (tool, study), "otus.fa")
+                results_dir, datatype, method, "%s_%s" % (tool, study), "otus.fa")
         else:
             rep_set_fasta = os.path.join(
-                results_dir, gene, method, "%s_%s" % (tool, study), "rep_set", "seqs_rep_set.fasta")
+                results_dir, datatype, method, "%s_%s" % (tool, study), "rep_set", "seqs_rep_set.fasta")
     else:
         rep_set_fasta = os.path.join(
-            results_dir, gene, method, "%s_%s" % (tool, study), "rep_set.fna")
+            results_dir, datatype, method, "%s_%s" % (tool, study), "rep_set.fna")
 
     otus_fasta = os.path.join(
-        tmp_dir, gene, method, "%s_%s_fp.fasta" % (tool, study))
+        out_dir, datatype, method, "%s_%s_fp.fasta" % (tool, study))
     filter_fasta_command = ["filter_fasta.py",
                             "-f", rep_set_fasta, "-o", otus_fasta,
                             "-s", fp_otus_ids_f]
@@ -284,15 +284,15 @@ def compute_fp_other(results_dir,
         print stderr
 
     # search for chimeras in all false positive OTUs using UCHIME
-    if gene == "16S":
+    if datatype == "16S":
         chimera_db = chimera_db_16S
-    elif gene == "18S":
+    elif datatype == "18S":
         chimera_db = chimera_db_18S
     else:
-        raise ValueError("%s not supported" % gene)
+        raise ValueError("%s not supported" % datatype)
 
     chimeric_otus_fasta = os.path.join(
-        tmp_dir, gene, method, "%s_%s_fp_chimeras.fasta" % (tool, study))
+        out_dir, datatype, method, "%s_%s_fp_chimeras.fasta" % (tool, study))
     uchime_command = ["usearch70", "-uchime_ref", otus_fasta,
                       "-db", chimera_db,
                       "-strand", "plus", "-chimeras", chimeric_otus_fasta]
@@ -331,7 +331,7 @@ def compute_fp_other(results_dir,
 
     # write remaining non-chimeric false positive OTU ids into file
     fp_otus_non_chimeric_ids = os.path.join(
-        tmp_dir, gene, method, "%s_%s_fp_otus_non_chimeric.txt" % (tool, study))
+        out_dir, datatype, method, "%s_%s_fp_otus_non_chimeric.txt" % (tool, study))
     with open(fp_otus_non_chimeric_ids, "w") as fp_otus_non_chimeric_ids_fp:
         for s in false_positive_otus:
             for otu_id in false_positive_otus[s]:
@@ -339,7 +339,7 @@ def compute_fp_other(results_dir,
 
     # get FASTA file of non-chimeric false positive OTU ids
     fp_otus_non_chimeric_fasta = os.path.join(
-        tmp_dir, gene, method, "%s_%s_fp_otus_non_chimeric.fasta" % (tool, study))
+        out_dir, datatype, method, "%s_%s_fp_otus_non_chimeric.fasta" % (tool, study))
     filter_fasta_command = ["filter_fasta.py", "-f", rep_set_fasta,
                             "-o", fp_otus_non_chimeric_fasta, "-s",
                             fp_otus_non_chimeric_ids]
@@ -352,7 +352,7 @@ def compute_fp_other(results_dir,
 
     # megablast all OTUs against nt database
     otus_blast = os.path.join(
-        tmp_dir, gene, method, "%s_%s_fp_non_chimeric.blast" % (tool, study))
+        out_dir, datatype, method, "%s_%s_fp_non_chimeric.blast" % (tool, study))
     blast_command = ["blastn",
                      "-task", "megablast",
                      "-db", blast_nt_index,
@@ -419,7 +419,7 @@ def compute_fp_other(results_dir,
         # TP, FP-known, FP-other
         graph_abundance_func(
             true_positive_otus, false_positive_known_otus, false_positive_other_otus, \
-            false_positive_chimeric_otus, gene, tool, study, method, \
+            false_positive_chimeric_otus, datatype, tool, study, method, \
             results_dir, taxonomy_mean, taxonomy_stdev)
 
     return fp_chimera, fp_known, fp_other
@@ -433,145 +433,207 @@ def main(argv):
        each method and tool.
     '''
 
-    # software results directory
-    results_dir = "/scratch/Users/evko1434/working_dir/program_results"
+    # program results directory
+    # must follow the structure (default output of commands_16S.sh and commands_18S.sh):
+    # $rootdir/16S/
+    #             /closed_ref/
+    #                        ..
+    #             /open_ref/
+    #                       ..
+    #             /de_novo/
+    #                     ..
+    #                     /swarm_1685/
+    #                                /(output from OTU-picking)
+    #                     /sumaclust_1685/
+    #
+    results_dir = sys.argv[1]
 
     # summarized taxonomies directory
     # (same outdir_root path as in run_summarize_taxa.py)
-    summarize_taxa_dir = "/scratch/Users/evko1434/working_dir/summarize_taxa_mc2"
+    summarize_taxa_dir = sys.argv[2]
 
     # output directory
-    tmp_dir = "/scratch/Users/evko1434/working_dir/compute_precision_recall_results"
+    out_dir = sys.argv[3]
 
     # chimera database for 18S
-    chimera_db_18S = "/scratch/Users/evko1434/Silva_111_post/rep_set/97_Silva_111_rep_set.fasta"
+    chimera_db_18S = sys.argv[4]
 
     # chimera database for 16S
-    chimera_db_16S = "/scratch/Users/evko1434/reference/gold.fa"
+    chimera_db_16S = sys.argv[5]
 
     # path to blast NT indexed database
-    blast_nt_index = "/scratch/Users/evko1434/reference/blast_databases"
+    blast_nt_index = sys.argv[6]
 
-    # Global variables
-    # these lists will contain mean number of reads + stdev for TP, FP-known,
-    # FP-other, FP-chimeric groups ex. taxonomy_mean = {"sumaclust": [4,76,21,53],
-    # "swarm": [489,2,32,4,3], ..}
-    taxonomy_mean = {}
-    taxonomy_stdev = {}
+    # studies 16S
+    studies_bac = sys.argv[7].split()
 
-    expected_tax = set()
+    # studies 18S
+    studies_euk = sys.argv[8].split()
+
+    # list of studies for each gene type
+    studies = {'16S': [], '18S': []}
+
+    for study in studies_bac:
+      if study not in studies['16S']:
+        studies['16S'].append(study)
+
+    for study in studies_euk:
+      if study not in studies['18S']:
+        studies['18S'].append(study)
+
+    # tools
+    tools_denovo = sys.argv[9].split()
+    tools_closed_ref = sys.argv[10].split()
+    tools_open_ref = sys.argv[11].split()
+
+    # list of tools for each OTU picking method
+    tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
+
+    for tool in tools_denovo:
+      if tool not in tools['de_novo']:
+        tools['de_novo'].append(tool)
+    for tool in tools_closed_ref:
+      if tool not in tools['closed_ref']:
+        tools['closed_ref'].append(tool)
+    for tool in tools_open_ref:
+      if tool not in tools['open_ref']:
+        tools['open_ref'].append(tool)
+
+    # filepath to expected summarized taxonomies
+    expected_fp = sys.argv[12]
+
+    # OTU-picking methods
     methods = ['de_novo', 'closed_ref', 'open_ref']
-    tools = {"de_novo": ['uparse_q16', 'uparse_q3', 'swarm', 'sumaclust',
-                         'uclust', 'usearch', 'usearch61'],
-             "closed_ref": ['sortmerna', 'uclust', 'usearch', 'usearch61'],
-             "open_ref": ['sortmerna_sumaclust', 'uclust', 'usearch61']}
 
-    gene = sys.argv[1]
-    study = sys.argv[2]
-    tax_level = sys.argv[3]
-    expected_f = sys.argv[4]
+    # genes 
+    datatypes = ['16S', '18S']
+
     singletons_removed = True
-    find_contaminants = True
-    graph_abundance = True
 
-    # do not need to compute false-positive
-    if (study == "even" or study == "staggered"):
-        find_contaminants = False
-        graph_abundance = False
-
-    with open(expected_f, 'U') as expected:
-        for line in expected:
-            if line.startswith('#'):
-                continue
-            else:
-                tax = line.split()[0]
-                expected_tax.add(tax)
-
-    for method in methods:
-        sys.stdout.write("%s\n" % method)
-        for tool in tools[method]:    
-            actual_tax = set()
-            if singletons_removed:
-                otu_table = "otu_table_mc2_%s.txt" % tax_level
-            else:
-                otu_table = "otu_table_%s.txt" % tax_level
-
-            if not os.path.exists(os.path.join(tmp_dir, gene, method)):
-                os.makedirs(os.path.join(tmp_dir, gene, method))
-
-            if not os.path.exists(os.path.join(
-                summarize_taxa_dir, gene, method, "%s_%s" % (tool, study), otu_table)):
-                print "%s does not exist" % os.path.join(
-                    summarize_taxa_dir, gene, method, "%s_%s" % (tool, study), otu_table)
-                continue
-
-            with open(os.path.join(
-                summarize_taxa_dir, gene, method, "%s_%s" % (tool, study), otu_table), 'U') as actual:
-                for line in actual:
-                    if line.startswith('#'):
-                        continue
+    # ex. 16S
+    for datatype in datatypes:
+        # ex. closed_ref
+        for method in methods:
+            # ex. swarm
+            for tool in tools[method]:
+                sys.stdout.write("%s\n" % method)
+                # ex. 1685
+                for study in studies[datatype]:
+                    sys.stdout.write("%s\n" % study)
+                    if study == "nematodes":
+                        tax_level = "L5"
                     else:
-                        # remove ";Other" strings appended by summarize_taxa.py to extend
-                        # taxonomy up to specified taxonomy level
-                        if ";Other" in line:
-                            line = line.replace(";Other","")
-                        tax = line.strip().split("\t")[0]
-                        actual_tax.add(tax)
+                        tax_level = "L6"
+                    expected_f = os.path.join(expected_fp, study, "%s_%s.txt" % (study, tax_level))
 
-            if tmp_dir != "None":
-                # output list of false-positive taxa
-                with open(os.path.join(tmp_dir, gene, method, "%s_%s_fp.txt" % (tool, study)), 'w') as of:
-                    lis = actual_tax - expected_tax
-                    for l in lis:
-                        of.write("%s\n" % l)
+                    # these lists will contain mean number of reads + stdev for TP, FP-known,
+                    # FP-other, FP-chimeric groups ex. taxonomy_mean = {"sumaclust": [4,76,21,53],
+                    # "swarm": [489,2,32,4,3], ..}
+                    taxonomy_mean = {}
+                    taxonomy_stdev = {}
+
+                    expected_tax = set()
+
+                    find_contaminants = True
+                    graph_abundance = True
+
+                    # do not need to find contaminants for simulated communities
+                    if (study == "even" or study == "staggered"):
+                        find_contaminants = False
+                        graph_abundance = False
+
+                    with open(expected_f, 'U') as expected:
+                        for line in expected:
+                            if line.startswith('#'):
+                                continue
+                            else:
+                                tax = line.split()[0]
+                                expected_tax.add(tax)
+
+                    actual_tax = set()
+                    if singletons_removed:
+                        otu_table = "otu_table_mc2_%s.txt" % tax_level
+                    else:
+                        otu_table = "otu_table_%s.txt" % tax_level
+
+                    # create output directory for 
+                    if not os.path.exists(os.path.join(out_dir, datatype, method)):
+                        os.makedirs(os.path.join(out_dir, datatype, method))
+
+                    # skip analysis if summarized taxa file does exist
+                    if not os.path.exists(os.path.join(
+                        summarize_taxa_dir, datatype, method, "%s_%s" % (tool, study), otu_table)):
+                        print "skipping %s does not exist" % os.path.join(
+                            summarize_taxa_dir, datatype, method, "%s_%s" % (tool, study), otu_table)
+                        continue
+
+                    with open(os.path.join(
+                        summarize_taxa_dir, datatype, method, "%s_%s" % (tool, study), otu_table), 'U') as actual:
+                        for line in actual:
+                            if line.startswith('#'):
+                                continue
+                            else:
+                                # remove ";Other" strings appended by summarize_taxa.py to extend
+                                # taxonomy up to specified taxonomy level
+                                if ";Other" in line:
+                                    line = line.replace(";Other","")
+                                tax = line.strip().split("\t")[0]
+                                actual_tax.add(tax)
+
+                    if out_dir != "None":
+                        # output list of false-positive taxa
+                        with open(os.path.join(out_dir, datatype, method, "%s_%s_fp.txt" % (tool, study)), 'w') as of:
+                            lis = actual_tax - expected_tax
+                            for l in lis:
+                                of.write("%s\n" % l)
+                            
+                        # output list of false-negative taxa
+                        with open(os.path.join(out_dir, datatype, method, "%s_%s_fn.txt" % (tool, study)), 'w') as fn_o:
+                            lis = expected_tax - actual_tax
+                            for l in lis:
+                                fn_o.write("%s\n" % l)
                     
-                # output list of false-negative taxa
-                with open(os.path.join(tmp_dir, gene, method, "%s_%s_fn.txt" % (tool, study)), 'w') as fn_o:
-                    lis = expected_tax - actual_tax
-                    for l in lis:
-                        fn_o.write("%s\n" % l)
-            
-                # output list of true-positive taxa
-                with open(os.path.join(tmp_dir, gene, method, "%s_%s_tp.txt" % (tool, study)), 'w') as tp_o:
-                    lis = actual_tax & expected_tax
-                    for l in lis:
-                        tp_o.write("%s\n" % l)
+                        # output list of true-positive taxa
+                        with open(os.path.join(out_dir, datatype, method, "%s_%s_tp.txt" % (tool, study)), 'w') as tp_o:
+                            lis = actual_tax & expected_tax
+                            for l in lis:
+                                tp_o.write("%s\n" % l)
 
-            fp_chimera = 0
-            fp_known = 0
-            fp_other = 0
+                    fp_chimera = 0
+                    fp_known = 0
+                    fp_other = 0
 
-            if find_contaminants:
-                fp_chimera, fp_known, fp_other = compute_fp_other(results_dir, tmp_dir,
-                    filter_otus_dir, chimera_db_18S, chimera_db_16S, taxonomy_mean, taxonomy_stdev,
-                    blast_nt_index, actual_tax, expected_tax, tool, study, gene,
-                    method, tax_level, graph_abundance)
+                    if find_contaminants:
+                        fp_chimera, fp_known, fp_other = compute_fp_other(results_dir, out_dir,
+                            filter_otus_dir, chimera_db_18S, chimera_db_16S, taxonomy_mean, taxonomy_stdev,
+                            blast_nt_index, actual_tax, expected_tax, tool, study, datatype,
+                            method, tax_level, graph_abundance)
 
-            tp = len(actual_tax & expected_tax)
-            fp = len(actual_tax - expected_tax)
-            fn = len(expected_tax - actual_tax)
+                    tp = len(actual_tax & expected_tax)
+                    fp = len(actual_tax - expected_tax)
+                    fn = len(expected_tax - actual_tax)
 
-            p = tp / float(tp + fp)
-            r = tp / float(tp + fn)
-            f = float(2 * p * r) / float(p + r)
+                    p = tp / float(tp + fp)
+                    r = tp / float(tp + fn)
+                    f = float(2 * p * r) / float(p + r)
 
-            sys.stdout.write("%s\t%.3f\t%.3f\t%.3f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (tool, p, r, f, tp, fn, fp, fp_chimera, fp_known, fp_other))
+                    sys.stdout.write("%s\t%.3f\t%.3f\t%.3f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (tool, p, r, f, tp, fn, fp, fp_chimera, fp_known, fp_other))
 
-        if graph_abundance:
-            # output taxonomy_mean and taxonomy_stdev values to file
-            with open (os.path.join(tmp_dir, gene, method, "%s_taxonomy_mean.txt" % study), 'w') as out_fp:
-                for tool in taxonomy_mean:
-                    out_fp.write("%s\t" % tool)
-                    for value in taxonomy_mean[tool]:
-                        out_fp.write("%s\t" % value)
-                    out_fp.write("\n")
+                    if graph_abundance:
+                        # output taxonomy_mean and taxonomy_stdev values to file
+                        with open (os.path.join(out_dir, datatype, method, "%s_taxonomy_mean.txt" % study), 'w') as out_fp:
+                            for tool in taxonomy_mean:
+                                out_fp.write("%s\t" % tool)
+                                for value in taxonomy_mean[tool]:
+                                    out_fp.write("%s\t" % value)
+                                out_fp.write("\n")
 
-            with open (os.path.join(tmp_dir, gene, method, "%s_taxonomy_stdev.txt" % study), 'w') as out_fp:
-                for tool in taxonomy_stdev:
-                    out_fp.write("%s\t" % tool)
-                    for value in taxonomy_stdev[tool]:
-                        out_fp.write("%s\t" % value)
-                    out_fp.write("\n")
+                        with open (os.path.join(out_dir, datatype, method, "%s_taxonomy_stdev.txt" % study), 'w') as out_fp:
+                            for tool in taxonomy_stdev:
+                                out_fp.write("%s\t" % tool)
+                                for value in taxonomy_stdev[tool]:
+                                    out_fp.write("%s\t" % value)
+                                out_fp.write("\n")
 
 
 if __name__ == "__main__":

@@ -42,6 +42,9 @@ otu_clustering=/scratch/Users/evko1434/OTU-clustering
 # directory path to otu_clustering_datasets directory
 datasets=/scratch/Users/evko1434/otu_clustering_datasets
 
+# directory path to Blast's NT database
+blast_nt=/scratch/Users/evko1434/reference/blast_databases
+
 # number of threads to use (all of the $otu_clustering/param_files/* files should
 # also have threads set to use this number)
 num_threads=10
@@ -53,9 +56,18 @@ num_jobs=1
 #studies="even staggered 1685 1686 1688 449 632"
 studies_bac="staggered"
 
+# subset of $studies_bac that are simulated or mock (to be passed to
+# run_compute_precision_recall.py)
+#simulated_mock_studies_bac="even staggered 1685 1688"
+simulated_mock_studies_bac="staggered"
+
 # list of 18S studies to analyze (each study must be separated by a space)
 #studies_euk="nematodes 2107"
 studies_euk="nematodes"
+
+# subset of $studies_euk that are simulated or mock (to be passed to
+# run_compute_precision_recall.py)
+simulated_mock_studies_euk="nematodes"
 
 # lists of tools for each method
 # these lists will only be used in subsequent scripts after commands_16.sh
@@ -134,9 +146,19 @@ mkdir $output_dir/program_results
 #    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
 # summarize taxa for all BIOM tables (not including singletons)
-mkdir $output_dir/run_summarize_taxa
-python $otu_clustering/python_scripts/run_summarize_taxa.py \
-    $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
-    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
+#mkdir $output_dir/run_summarize_taxa
+#python $otu_clustering/python_scripts/run_summarize_taxa.py \
+#    $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
+#    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
+# Compute true positive, false positive, false negative, precision, recall,
+# F-measure and FP-chimera, FP-known, FP-other metrics using the summarized
+# taxonomy results
+mkdir $output_dir/run_compute_precision_recall
+python $otu_clustering/python_scripts/run_compute_precision_recall.py \
+    $output_dir/program_results $output_dir/run_summarize_taxa \
+    $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
+    $blast_nt "${simulated_mock_studies_bac}" "${simulated_mock_studies_euk}" \
+    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
+    $datasets/expected_taxonomies 
 
