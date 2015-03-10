@@ -624,7 +624,7 @@ def main(argv):
                             summarize_tables_dir, datatype, method, "%s_%s" % (tool, study), "table_summary.txt"), 'U') as sum_table:
                             for line in sum_table:
                                 if line.startswith("Num observations: "):
-                                    num_otus = line.strip().split()[1]
+                                    num_otus = line.strip().split()[2]
                                     break
 
                     sys.stdout.write("%s\t%s\t%.2f\t%.2f\t%.2f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (tool, num_otus, p, r, f, tp, fn, fp, fp_chimera, fp_known, fp_other))

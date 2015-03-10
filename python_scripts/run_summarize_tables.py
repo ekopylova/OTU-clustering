@@ -106,6 +106,8 @@ if __name__ == '__main__':
                         stdout, stderr = proc.communicate()
                         if stderr:
                             print stderr
+                    else:
+                        print "skipping %s already exists" % os.path.join(outdir)
                
 
 
