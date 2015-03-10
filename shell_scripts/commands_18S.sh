@@ -62,7 +62,7 @@ do
     # Run with UCLUST                                                                                                                                
     echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/uclust_$i -a -O $num_jobs -p $param_dir/DN_uclust_params.txt" | qsub -N 18DN_UC_$i $qsub_params; sleep 2
     # Run with USEARCH61                                                                                                                                                 
-    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/usearch61_$i -a -O $num_jobs-p $param_dir/DN_usearch61_params.txt" | qsub -N 18DN_US61_$i $qsub_params; sleep 2
+    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/usearch61_$i -a -O $num_jobs -p $param_dir/DN_usearch61_params.txt" | qsub -N 18DN_US61_$i $qsub_params; sleep 2
     # Run with Swarm
     echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/swarm_$i -a -O $num_jobs -p $param_dir/DN_swarm_params.txt" | qsub -N 18DN_SW_$i $qsub_params; sleep 2
     # Run with USEARCH52 - no chimera detection            
