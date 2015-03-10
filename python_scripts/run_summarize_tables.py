@@ -33,6 +33,12 @@ if __name__ == '__main__':
     # output results directory 
     outdir_root = sys.argv[2]
 
+    # studies 16S
+    studies_bac = sys.argv[3].split()
+
+    # studies 18S
+    studies_euk = sys.argv[4].split()
+
     # list of studies for each gene type
     studies = {'16S': [], '18S': []}
 
