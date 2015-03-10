@@ -150,8 +150,7 @@ def compute_fp_other(results_dir,
                      study,
                      datatype,
                      method,
-                     tax_level,
-                     graph_abundance=True):
+                     tax_level):
     '''This function completes the following steps,
          1. Load original OTU table (excl. singleton OTUs) into dict with taxonomies as
             keys and OTUs representing them as values in a list (only L5 and L6 supported)
@@ -415,12 +414,10 @@ def compute_fp_other(results_dir,
     print "Total other taxa = ", fp_other
 
     # make bar charts for TP/FP-known/FP-other 
-    if graph_abundance:
-        # TP, FP-known, FP-other
-        graph_abundance_func(
-            true_positive_otus, false_positive_known_otus, false_positive_other_otus, \
-            false_positive_chimeric_otus, datatype, tool, study, method, \
-            results_dir, taxonomy_mean, taxonomy_stdev)
+    graph_abundance_func(
+        true_positive_otus, false_positive_known_otus, false_positive_other_otus, \
+        false_positive_chimeric_otus, datatype, tool, study, method, \
+        results_dir, taxonomy_mean, taxonomy_stdev)
 
     return fp_chimera, fp_known, fp_other
 
@@ -527,6 +524,15 @@ def main(argv):
                 else:
                     tax_level = "L6"
                 expected_f = os.path.join(expected_fp, study, "%s_%s.txt" % (study, tax_level))
+
+                expected_tax = set()
+                with open(expected_f, 'U') as expected:
+                    for line in expected:
+                        if line.startswith('#'):
+                            continue
+                        else:
+                            tax = line.split()[0]
+                            expected_tax.add(tax)
                 # ex. swarm
                 for tool in tools[method]:
                     # these lists will contain mean number of reads + stdev for TP, FP-known,
@@ -534,16 +540,6 @@ def main(argv):
                     # "swarm": [489,2,32,4,3], ..}
                     taxonomy_mean = {}
                     taxonomy_stdev = {}
-
-                    expected_tax = set()
-
-                    with open(expected_f, 'U') as expected:
-                        for line in expected:
-                            if line.startswith('#'):
-                                continue
-                            else:
-                                tax = line.split()[0]
-                                expected_tax.add(tax)
 
                     actual_tax = set()
                     if singletons_removed:
@@ -602,7 +598,7 @@ def main(argv):
                         fp_chimera, fp_known, fp_other = compute_fp_other(results_dir, out_dir,
                             filter_otus_dir, chimera_db_18S, chimera_db_16S, taxonomy_mean, taxonomy_stdev,
                             blast_nt_index, actual_tax, expected_tax, tool, study, datatype,
-                            method, tax_level, graph_abundance)
+                            method, tax_level)
 
                     tp = len(actual_tax & expected_tax)
                     fp = len(actual_tax - expected_tax)
