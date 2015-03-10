@@ -38,9 +38,13 @@ num_threads=10
 # number of jobs to launch
 num_jobs=1
 
-# list of studies to analyze
+# list of 16S studies to analyze
 #studies="even staggered 1685 1686 1688 449 632"
-studies="staggered"
+studies_bac="staggered"
+
+# list of 18S studies to analyze
+#studies_euk="nematodes 2107"
+studies_euk="nematodes"
 
 # qsub params
 qsub_params="-k oe -q long8gb -l nodes=1:ppn=$num_threads -l walltime=120:00:00"
@@ -68,39 +72,40 @@ mkdir $output_dir
 mkdir $output_dir/program_results
 
 # simulate even / staggered reads 
-mkdir $output_dir/simulated_reads
-bash $otu_clustering/shell_scripts/simulate_reads.sh $output_dir/simulated_reads $gg_reference $gg_taxonomy $otu_clustering $datasets/mapping_files
+#mkdir $output_dir/simulated_reads
+#bash $otu_clustering/shell_scripts/simulate_reads.sh $output_dir/simulated_reads $gg_reference $gg_taxonomy $otu_clustering $datasets/mapping_files
 
 # launch software on 16S data
-bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
-    $gg_taxonomy \
-    $gold_fp \
-    $template_fp_bac \
-    $studies_path_qiime/16S \
-    $studies_path_uparse/16S \
+#bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
+#    $gg_taxonomy \
+#    $gold_fp \
+#    $template_fp_bac \
+#    $studies_path_qiime/16S \
+#    $studies_path_uparse/16S \
+#    $output_dir/program_results \
+#    $otu_clustering/param_files/16S \
+#    $otu_clustering/shell_scripts \
+#    $otu_clustering/python_scripts \
+#    $num_threads \
+#    $num_jobs \
+#    "${studies_bac}" \
+#    "${qsub_params}"
+
+# launch software on 18S data
+bash $otu_clustering/shell_scripts/commands_18S.sh $silva_reference \
+    $silva_taxonomy \
+    $silva_reference \
+    $template_fp_euk \
+    $studies_path_qiime/18S \
+    $studies_path_uparse/18S \
     $output_dir/program_results \
-    $otu_clustering/param_files/16S \
+    $otu_clustering/param_files/18S \
     $otu_clustering/shell_scripts \
     $otu_clustering/python_scripts \
     $num_threads \
     $num_jobs \
-    "${studies}" \
+    "${studies_euk}" \
     "${qsub_params}"
-
-# launch software on 18S data
-#bash $otu_clustering/shell_scripts/commands_18S.sh $silva_reference \
-#												   $silva_taxonomy \
-#												   $silva_reference \
-#												   $template_fp_euk \
-#												   $studies_path_qiime/18S \
-#												   $studies_path_uparse/18S \
-#												   $output_dir/program_results \
-#												   $otu_clustering/param_files/18S \
-#												   $otu_clustering/shell_scripts \
-#												   $num_threads \
-#												   $num_jobs \
-#												   ${studies} \
-#												   ${qsub_params}
 
 # remove singleton OTUs (OTUs comprising of only 1 read) from the final OTU tables
 #mkdir $output_dir/run_filter_singleton_otus
