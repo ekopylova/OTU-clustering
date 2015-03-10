@@ -94,7 +94,7 @@ mkdir $out_open_dir
 for i in ${studies[@]}
 do
     # Run with SortMeRNA and SUMACLUST
-    echo "pick_open_reference_otus.py -m sortmerna_sumaclust -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_open_dir/sortmerna_sumaclust_$i -p $param_dir/OR_sortmerna_sumaclust_params.txt -a -O $num_jobs" | qsub -N 18OR_SMR_SC_$i $qsub_params; sleep 2
+    echo "pick_open_reference_otus.py -m sortmerna_sumaclust -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_open_dir/sortmerna_sumaclust_$i -p $param_dir/OR_sortmerna_sumaclust_params.txt -a -O $num_jobs" | qsub -N 18OR_SMR_SC_$i $qsub_params; sleep 2
     # Run with UCLUST
     echo "pick_open_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_open_dir/uclust_$i -p $param_dir/OR_params.txt -a -O $num_jobs" | qsub -N 18OR_UC_$i $qsub_params; sleep 2
     # Run with USEARCH61
