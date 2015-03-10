@@ -237,16 +237,16 @@ def compute_fp_other(results_dir,
             else:
                 false_positive_otus[l].extend(otu_table_dict[l])
 
-    print "Total true positive taxa = ", len(true_positive_otus)
-    print "Total false positive taxa = ", len(false_positive_otus)
+    #print "Total true positive taxa = ", len(true_positive_otus)
+    #print "Total false positive taxa = ", len(false_positive_otus)
     false_positive_otus_count = 0
     for s in false_positive_otus:
         false_positive_otus_count += len(false_positive_otus[s])
-    print "Total false positive otus = ", false_positive_otus_count
+    #print "Total false positive otus = ", false_positive_otus_count
     true_positive_otus_count = 0
     for s in true_positive_otus:
         true_positive_otus_count += len(true_positive_otus[s])
-    print "Total true positive otus = ", true_positive_otus_count
+    #print "Total true positive otus = ", true_positive_otus_count
 
     # create list file of false positive OTUs
     fp_otus_ids_f = os.path.join(out_dir, datatype, method, "%s_%s_fp_ids.txt" % (tool, study))
@@ -275,7 +275,7 @@ def compute_fp_other(results_dir,
     filter_fasta_command = ["filter_fasta.py",
                             "-f", rep_set_fasta, "-o", otus_fasta,
                             "-s", fp_otus_ids_f]
-    print "command = ", filter_fasta_command
+    #print "command = ", filter_fasta_command
     proc = Popen(filter_fasta_command, stdout=PIPE, stderr=PIPE, close_fds=True)
     proc.wait()
     stdout, stderr = proc.communicate()
@@ -295,7 +295,7 @@ def compute_fp_other(results_dir,
     uchime_command = ["usearch70", "-uchime_ref", otus_fasta,
                       "-db", chimera_db,
                       "-strand", "plus", "-chimeras", chimeric_otus_fasta]
-    print "command = ", uchime_command
+    #print "command = ", uchime_command
     proc = Popen(uchime_command, stdout=PIPE, stderr=PIPE, close_fds=True)
     proc.wait()
     stdout, stderr = proc.communicate()
@@ -308,7 +308,7 @@ def compute_fp_other(results_dir,
         for label, seq in parse_fasta(identified_chimeras_fp):
             chimeric_ids.append(label)
 
-    print "Total chimeric OTUs identified in false-positive set: %s" % len(chimeric_ids)
+    #print "Total chimeric OTUs identified in false-positive set: %s" % len(chimeric_ids)
 
     false_positive_chimeric_otus = copy.deepcopy(false_positive_otus)
     chimeric_taxa = []
@@ -322,7 +322,7 @@ def compute_fp_other(results_dir,
                 if len(false_positive_otus[s]) == 0:
                     fp_chimera += 1
                     chimeric_taxa.append(s)
-    print "Total chimeric taxa: ", fp_chimera
+    #print "Total chimeric taxa: ", fp_chimera
 
     for taxa in false_positive_otus:
         if len(false_positive_otus[taxa]) != 0:
@@ -342,7 +342,7 @@ def compute_fp_other(results_dir,
     filter_fasta_command = ["filter_fasta.py", "-f", rep_set_fasta,
                             "-o", fp_otus_non_chimeric_fasta, "-s",
                             fp_otus_non_chimeric_ids]
-    print "command = ", filter_fasta_command
+    #print "command = ", filter_fasta_command
     proc = Popen(filter_fasta_command, stdout=PIPE, stderr=PIPE, close_fds=True)
     proc.wait()
     stdout, stderr = proc.communicate()
@@ -361,7 +361,7 @@ def compute_fp_other(results_dir,
                      "-outfmt", "6 std qcovs",
                      "-max_target_seqs", "1",
                      "-num_threads", "50"]
-    print "command = ", blast_command
+    #print "command = ", blast_command
     proc = Popen(blast_command, stdout=PIPE, stderr=PIPE, close_fds=True)
     proc.wait()
     stdout, stderr = proc.communicate()
@@ -379,8 +379,8 @@ def compute_fp_other(results_dir,
                     line[0] = "%s;" % line[0]
                 contaminants.add(line[0])
 
-    print "Total known OTUs (map with >=97%% id and 100%% coverage) = ", len(contaminants)
-    print "Total other OTUs (map with <97%% id and <100%% coverage) = ", false_positive_otus_count-len(chimeric_ids)-len(contaminants)
+    #print "Total known OTUs (map with >=97%% id and 100%% coverage) = ", len(contaminants)
+    #print "Total other OTUs (map with <97%% id and <100%% coverage) = ", false_positive_otus_count-len(chimeric_ids)-len(contaminants)
 
     # Create a copy of FP - chimera. In the next step,
     # FP - chimera also removes known taxa from the dictionary,
@@ -406,12 +406,12 @@ def compute_fp_other(results_dir,
         if len(false_positive_otus[taxa]) == 0:
             del false_positive_other_otus[taxa]
 
-    print "Total known taxa = ", fp_known
+    #print "Total known taxa = ", fp_known
 
     for s in false_positive_otus:
         if len(false_positive_otus[s]) != 0:
             fp_other += 1
-    print "Total other taxa = ", fp_other
+    #print "Total other taxa = ", fp_other
 
     # make bar charts for TP/FP-known/FP-other 
     graph_abundance_func(
