@@ -46,11 +46,14 @@ studies_bac="staggered"
 #studies_euk="nematodes 2107"
 studies_euk="nematodes"
 
-# list of tools (this list will only be used in all subsequent scripts after
-# commands_16.sh and commands_18.sh, if the user updates either of these two
-# files to include other tools for benchmarks, the list below should be updated
-# as well)
-tools="de_novo: uclust,usearch,usearch61,swarm,sumaclust,uparse_q3,uparse_q16; closed_ref: sortmerna,uclust,usearch61,usearch; open_ref: sortmerna_sumaclust,uclust,usearch61"
+# lists of tools for each method
+# these lists will only be used in subsequent scripts after commands_16.sh
+# and commands_18.sh. If the user would like to add other tools to any of
+# the methods, they must also update the commands in the two previously
+# mentioned files
+tools_denovo="uclust usearch usearch61 swarm sumaclust uparse_q3 uparse_q16"
+tools_closed_ref="sortmerna uclust usearch61 usearch"
+tools_open_ref="sortmerna_sumaclust uclust usearch61"
 
 # qsub params
 qsub_params="-k oe -q long8gb -l nodes=1:ppn=$num_threads -l walltime=120:00:00"
@@ -115,5 +118,7 @@ mkdir $output_dir/program_results
 
 # remove singleton OTUs (OTUs comprising of only 1 read) from the final OTU tables
 mkdir $output_dir/run_filter_singleton_otus
-python $otu_clustering/python_scripts/run_filter_singleton_otus.py $output_dir/program_results $output_dir/run_filter_singleton_otus "${studies_bac}" "${studies_euk}" "${tools}"
+python $otu_clustering/python_scripts/run_filter_singleton_otus.py \
+    $output_dir/program_results $output_dir/run_filter_singleton_otus \
+    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 

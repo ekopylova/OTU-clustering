@@ -58,33 +58,38 @@ if __name__ == '__main__':
       if study not in studies['18S']:
         studies['18S'].append(study)
 
-    print "studies = ", studies
-
     # tools
-    tools_list = sys.argv[5].split('; ')
-
-    print "tools_list = ", tools_list
+    tools_denovo = sys.argv[5].split()
+    tools_closed_ref = sys.argv[6].split()
+    tools_open_ref = sys.argv[7].split()
 
     # list of tools for each OTU picking method
     tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
+
+    for tool in tools_denovo:
+      if tool not in tools['de_novo']:
+        tools['de_novo'].append(tool)
+    for tool in tools_closed_ref:
+      if tool not in tools['closed_ref']:
+        tools['closed_ref'].append(tool)
+    for tool in tools_open_ref:
+      if tool not in tools['open_ref']:
+        tools['open_ref'].append(tool)
 
     # genes 
     datatypes = ['16S', '18S']
 
     # OTU picking methods
-    picking = ['de_novo', 'closed_ref', 'open_ref']
+    methods = ['de_novo', 'closed_ref', 'open_ref']
 
-    # list of tools for each OTU picking method
-    #tools = {'de_novo': ['uclust', 'usearch', 'usearch61', 'swarm', 'sumaclust', 'uparse_q3', 'uparse_q16'],
-    #         'closed_ref': ['sortmerna', 'uclust', 'usearch61', 'usearch'],
-    #         'open_ref': ['sortmerna_sumaclust', 'uclust', 'usearch61']}
+    print "tools = ", tools
 
     exit()
 
     # ex. 16S
     for datatype in datatypes:
         # ex. closed_ref
-        for method in picking:
+        for method in methods:
             # ex. swarm
             for tool in tools[method]:
                 # ex. 1685
