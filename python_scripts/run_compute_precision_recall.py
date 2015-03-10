@@ -603,7 +603,7 @@ def main(argv):
                     fp_known = 0
                     fp_other = 0
 
-                    if (study is not "even" and study is not "staggered"):
+                    if ((study != "even") and (study != "staggered")):
                         fp_chimera, fp_known, fp_other = compute_fp_other(results_dir, out_dir,
                             filter_otus_dir, chimera_db_18S, chimera_db_16S, taxonomy_mean, taxonomy_stdev,
                             blast_nt_index, actual_tax, expected_tax, tool, study, datatype,
@@ -619,7 +619,7 @@ def main(argv):
 
                     sys.stdout.write("%s\t%.2f\t%.2f\t%.2f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (tool, p, r, f, tp, fn, fp, fp_chimera, fp_known, fp_other))
 
-                    if (study is not "even" and study is not "staggered"):
+                    if ((study != "even") and (study != "staggered")):
                         # output taxonomy_mean and taxonomy_stdev values to file
                         with open (os.path.join(out_dir, datatype, method, "%s_taxonomy_mean.txt" % study), 'w') as out_fp:
                             for tool in taxonomy_mean:
