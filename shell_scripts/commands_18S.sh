@@ -58,19 +58,19 @@ mkdir $out_denovo_dir
 for i in ${studies[@]}
 do
     # Run with SUMACLUST
-    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/sumaclust_$i -a -O $jobs -p $param_dir/DN_sumaclust_params.txt" | qsub -N 18DN_SC_$i $qsub_params; sleep 2
+    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/sumaclust_$i -a -O $num_jobs -p $param_dir/DN_sumaclust_params.txt" | qsub -N 18DN_SC_$i $qsub_params; sleep 2
     # Run with UCLUST                                                                                                                                
-    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/uclust_$i -a -O $jobs -p $param_dir/DN_uclust_params.txt" | qsub -N 18DN_UC_$i $qsub_params; sleep 2
+    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/uclust_$i -a -O $num_jobs -p $param_dir/DN_uclust_params.txt" | qsub -N 18DN_UC_$i $qsub_params; sleep 2
     # Run with USEARCH61                                                                                                                                                 
-    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/usearch61_$i -a -O $jobs -p $param_dir/DN_usearch61_params.txt" | qsub -N 18DN_US61_$i $qsub_params; sleep 2
+    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/usearch61_$i -a -O $num_jobs-p $param_dir/DN_usearch61_params.txt" | qsub -N 18DN_US61_$i $qsub_params; sleep 2
     # Run with Swarm
-    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/swarm_$i -a -O $jobs -p $param_dir/DN_swarm_params.txt" | qsub -N 18DN_SW_$i $qsub_params; sleep 2
+    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/swarm_$i -a -O $num_jobs -p $param_dir/DN_swarm_params.txt" | qsub -N 18DN_SW_$i $qsub_params; sleep 2
     # Run with USEARCH52 - no chimera detection            
-    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/usearch_$i -a -O $jobs -p $param_dir/DN_usearch_params.txt" | qsub -N 18DN_US_$i $qsub_params; sleep 2
+    echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/usearch_$i -a -O $num_jobs -p $param_dir/DN_usearch_params.txt" | qsub -N 18DN_US_$i $qsub_params; sleep 2
     # Run UPARSE q16
-    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q16_$i $chimera_fp $procs $jobs $si_rep_set $si_tax $i $template_fp 16" | qsub -N 18DN_UP_$i $qsub_params; sleep 2
+    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q16_$i $chimera_fp $procs $num_jobs $si_rep_set $si_tax $i $template_fp 16" | qsub -N 18DN_UP_$i $qsub_params; sleep 2
     # Run UPARSE_q3
-    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q3_$i $chimera_fp $procs $jobs $si_rep_set $si_tax $i $template_fp 3" | qsub -N 18DN_UP_$i $qsub_params; sleep 2
+    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q3_$i $chimera_fp $procs $num_jobs $si_rep_set $si_tax $i $template_fp 3" | qsub -N 18DN_UP_$i $qsub_params; sleep 2
 done
 
 # Run closed-reference OTU picking on all the studies
@@ -81,11 +81,11 @@ do
     # Run with SortMeRNA
     echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_closed_dir/sortmerna_$i -t $si_tax -s -p $param_dir/CR_sortmerna_params.txt" | qsub -N 18CR_SMR_$i $qsub_params; sleep 2
     # Run with UCLUST
-    echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_closed_dir/uclust_$i -t $si_tax -s -p $param_dir/CR_uclust_params.txt -a -O $jobs" | qsub -N 18CR_UC_$i $qsub_params; sleep 2
+    echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_closed_dir/uclust_$i -t $si_tax -s -p $param_dir/CR_uclust_params.txt -a -O $num_jobs" | qsub -N 18CR_UC_$i $qsub_params; sleep 2
     # Run with USEARCH52
-    echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_closed_dir/usearch_$i -t $si_tax -s -p $param_dir/CR_usearch_params.txt -a -O $jobs" | qsub -N 18CR_US_$i $qsub_params; sleep 2
+    echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_closed_dir/usearch_$i -t $si_tax -s -p $param_dir/CR_usearch_params.txt -a -O $num_jobs" | qsub -N 18CR_US_$i $qsub_params; sleep 2
     # Run with USEARCH61
-    echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_closed_dir/usearch61_$i -t $si_tax -s -p $param_dir/CR_usearch61_params.txt -a -O $jobs" | qsub -N 18CR_US61_$i $qsub_params; sleep 2
+    echo "pick_closed_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_closed_dir/usearch61_$i -t $si_tax -s -p $param_dir/CR_usearch61_params.txt -a -O $num_jobs" | qsub -N 18CR_US61_$i $qsub_params; sleep 2
 done
 
 # Run open-reference OTU picking on all the studies
@@ -94,11 +94,11 @@ mkdir $out_open_dir
 for i in ${studies[@]}
 do
     # Run with SortMeRNA and SUMACLUST
-    echo "pick_open_reference_otus.py -m sortmerna_sumaclust -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_open_dir/sortmerna_sumaclust_$i -p $param_dir/OR_sortmerna_sumaclust_params.txt -a -O $jobs" | qsub -N 18OR_SMR_SC_$i $qsub_params; sleep 2
+    echo "pick_open_reference_otus.py -m sortmerna_sumaclust -i $studies_path_qiime/$i/seqs.fna -r $gg_rep_set -o $out_open_dir/sortmerna_sumaclust_$i -p $param_dir/OR_sortmerna_sumaclust_params.txt -a -O $num_jobs" | qsub -N 18OR_SMR_SC_$i $qsub_params; sleep 2
     # Run with UCLUST
-    echo "pick_open_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_open_dir/uclust_$i -p $param_dir/OR_params.txt -a -O $jobs" | qsub -N 18OR_UC_$i $qsub_params; sleep 2
+    echo "pick_open_reference_otus.py -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_open_dir/uclust_$i -p $param_dir/OR_params.txt -a -O $num_jobs" | qsub -N 18OR_UC_$i $qsub_params; sleep 2
     # Run with USEARCH61
-    echo "pick_open_reference_otus.py -m usearch61 -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_open_dir/usearch61_$i -p $param_dir/OR_params.txt -a -O $jobs" | qsub -N 18OR_US61_$i $qsub_params; sleep 2
+    echo "pick_open_reference_otus.py -m usearch61 -i $studies_path_qiime/$i/seqs.fna -r $si_rep_set -o $out_open_dir/usearch61_$i -p $param_dir/OR_params.txt -a -O $num_jobs" | qsub -N 18OR_US61_$i $qsub_params; sleep 2
 done
 
 
