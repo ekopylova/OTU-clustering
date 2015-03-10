@@ -125,6 +125,6 @@ mkdir $output_dir/program_results
 # summarize taxa for all BIOM tables (not including singletons)
 mkdir $output_dir/run_summarize_taxa
 python $otu_clustering/python_scripts/run_summarize_taxa.py \
-    $output_dir/run_filter_singleton_otus $output_dir/run_filter_singleton_otus \
+    $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
     "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
