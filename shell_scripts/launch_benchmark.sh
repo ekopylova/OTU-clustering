@@ -1,5 +1,16 @@
 #!/bin/bash
 
+#
+#
+#
+# Note: swarm v 1.2.19 will not execute if there are ambiguous/non-iupac nucleotides in any of the
+#       sequences. The tool prinseq-lite was used to filter out these foreign nucleotides from
+#       the even & staggered datasets using the command:
+#          prinseq-lite.pl -fasta seqs.fna -ns_max_n 0 -noniupac -out_good seqs_swarm -out_bad null
+#       This explains the additional seqs_swarm.fna files in both even & staggered distributed
+#       datasets 
+#
+
 ######### USER DEFINED VARIABLES #########
 # root output directory
 output_dir=/scratch/Users/evko1434/working
@@ -127,4 +138,5 @@ mkdir $output_dir/run_summarize_taxa
 python $otu_clustering/python_scripts/run_summarize_taxa.py \
     $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
     "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
+
 
