@@ -534,9 +534,6 @@ def main(argv):
 
                     expected_tax = set()
 
-                    find_contaminants = True
-                    graph_abundance = True
-
                     # do not need to find contaminants for simulated communities
                     if (study == "even" or study == "staggered"):
                         find_contaminants = False
@@ -603,7 +600,7 @@ def main(argv):
                     fp_known = 0
                     fp_other = 0
 
-                    if find_contaminants:
+                    if (study is not "even" and study is not "staggered"):
                         fp_chimera, fp_known, fp_other = compute_fp_other(results_dir, out_dir,
                             filter_otus_dir, chimera_db_18S, chimera_db_16S, taxonomy_mean, taxonomy_stdev,
                             blast_nt_index, actual_tax, expected_tax, tool, study, datatype,
@@ -617,9 +614,9 @@ def main(argv):
                     r = tp / float(tp + fn)
                     f = float(2 * p * r) / float(p + r)
 
-                    sys.stdout.write("%s\t%.3f\t%.3f\t%.3f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (tool, p, r, f, tp, fn, fp, fp_chimera, fp_known, fp_other))
+                    sys.stdout.write("%s\t%.2f\t%.2f\t%.2f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (tool, p, r, f, tp, fn, fp, fp_chimera, fp_known, fp_other))
 
-                    if graph_abundance:
+                    if (study is not "even" and study is not "staggered"):
                         # output taxonomy_mean and taxonomy_stdev values to file
                         with open (os.path.join(out_dir, datatype, method, "%s_taxonomy_mean.txt" % study), 'w') as out_fp:
                             for tool in taxonomy_mean:
