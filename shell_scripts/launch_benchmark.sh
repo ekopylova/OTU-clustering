@@ -117,8 +117,14 @@ mkdir $output_dir/program_results
 #    "${qsub_params}"
 
 # remove singleton OTUs (OTUs comprising of only 1 read) from the final OTU tables
-mkdir $output_dir/run_filter_singleton_otus
-python $otu_clustering/python_scripts/run_filter_singleton_otus.py \
-    $output_dir/program_results $output_dir/run_filter_singleton_otus \
+#mkdir $output_dir/run_filter_singleton_otus
+#python $otu_clustering/python_scripts/run_filter_singleton_otus.py \
+#    $output_dir/program_results $output_dir/run_filter_singleton_otus \
+#    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
+
+# summarize taxa for all BIOM tables (not including singletons)
+mkdir $output_dir/run_summarize_taxa
+python $otu_clustering/python_scripts/run_summarize_taxa.py \
+    $output_dir/run_filter_singleton_otus $output_dir/run_filter_singleton_otus \
     "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
