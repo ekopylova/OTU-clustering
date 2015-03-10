@@ -68,9 +68,9 @@ do
     # Run with USEARCH52 - no chimera detection            
     echo "pick_de_novo_otus.py -i $studies_path_qiime/$i/seqs.fna -o $out_denovo_dir/usearch_$i -a -O $num_jobs -p $param_dir/DN_usearch_params.txt" | qsub -N 18DN_US_$i $qsub_params; sleep 2
     # Run UPARSE q16
-    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q16_$i $chimera_fp $procs $num_jobs $si_rep_set $si_tax $i $template_fp 16" | qsub -N 18DN_UP_$i $qsub_params; sleep 2
+    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q16_$i $chimera_fp $procs $num_jobs $si_rep_set $si_tax $i $template_fp 16 $python_scripts" | qsub -N 18DN_UPQ16_$i $qsub_params; sleep 2
     # Run UPARSE_q3
-    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q3_$i $chimera_fp $procs $num_jobs $si_rep_set $si_tax $i $template_fp 3" | qsub -N 18DN_UP_$i $qsub_params; sleep 2
+    echo "bash $shell_scripts/run_uparse.sh $studies_path_uparse/$i/seqs.fastq $out_denovo_dir/uparse_q3_$i $chimera_fp $procs $num_jobs $si_rep_set $si_tax $i $template_fp 3 $python_scripts" | qsub -N 18DN_UPQ3_$i $qsub_params; sleep 2
 done
 
 # Run closed-reference OTU picking on all the studies
