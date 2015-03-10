@@ -82,10 +82,6 @@ if __name__ == '__main__':
     # OTU picking methods
     methods = ['de_novo', 'closed_ref', 'open_ref']
 
-    print "tools = ", tools
-
-    exit()
-
     # ex. 16S
     for datatype in datatypes:
         # ex. closed_ref
