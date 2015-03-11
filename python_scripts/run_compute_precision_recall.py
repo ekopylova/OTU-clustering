@@ -613,7 +613,7 @@ def main(argv):
 
                     num_otus = 0
 
-                    # find number of OTUs
+                    # retrieve number of OTUs
                     if not os.path.exists(os.path.join(
                         summarize_tables_dir, datatype, method, "%s_%s" % (tool, study), "table_summary.txt")):
                         print "skipping %s does not exist" % os.path.join(
@@ -627,7 +627,7 @@ def main(argv):
                                     num_otus = line.strip().split()[2]
                                     break
 
-                    sys.stdout.write("%s\t%s\t%.2f\t%.2f\t%.2f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (tool, num_otus, p, r, f, tp, fn, fp, fp_chimera, fp_known, fp_other))
+                    sys.stdout.write("%s\t%s\t%.2f\t%.2f\t%.2f\t%s\t%s\t%s\t%s\t%s\t%s\n" % (tool, num_otus, p, r, f, tp, fp, fn, fp_chimera, fp_known, fp_other))
 
                     if ((study != "even") and (study != "staggered")):
                         # output taxonomy_mean and taxonomy_stdev values to file

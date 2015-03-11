@@ -34,38 +34,64 @@ import brewer2mpl
 
 def main():
 
-    # output results directory 
-    outdir_root = "/scratch/Users/evko1434/working_dir/single_rarefaction_and_plots_mc2"
-
     # original BIOM tables excl. singletons directory
-    # (same outdir_root path as in run_filter_singleton_otus.py)
-    rootdir = "/scratch/Users/evko1434/working_dir/otu_tables_mc2"
+    rootdir = sys.argv[1]
+
+    # output results directory 
+    outdir_root = sys.argv[2]
     
     # trees (generated during de novo/open ref OTU picking, will be in
     # same directory as all results)
-    treedir = "/scratch/Users/evko1434/working_dir/program_results"
+    treedir = sys.argv[3]
 
     # trees for closed-reference analysis (16S distributed with Greengenes, 18S built)
-    tree_fp = {'16S': "/scratch/Users/evko1434/reference/gg_13_8_otus/trees/97_otus.tree",
-               '18S': "/scratch/Users/evko1434/reference/Silva_111_post/trees/97_Silva_111_rep_set_pfiltered.tre"}
+    tree_fp = {'16S': "", '18S': ""}
+    tree_fp['16S'] = sys.argv[4]
+    tree_fp['18S'] = sys.argv[5]
 
     # mapping files directory
-    mapping_dir = "/scratch/Users/evko1434/supplemental_otu_clustering_datasets/mapping_files"
+    mapping_dir = sys.argv[6]
+
+    # studies 16S
+    studies_bac = sys.argv[7].split()
+
+    # studies 18S
+    studies_euk = sys.argv[8].split()
+
+    # list of studies for each gene type
+    studies = {'16S': [], '18S': []}
+
+    for study in studies_bac:
+      if study not in studies['16S']:
+        studies['16S'].append(study)
+
+    for study in studies_euk:
+      if study not in studies['18S']:
+        studies['18S'].append(study)
+
+    # tools
+    tools_denovo = sys.argv[9].split()
+    tools_closed_ref = sys.argv[10].split()
+    tools_open_ref = sys.argv[11].split()
+
+    # list of tools for each OTU picking method
+    tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
+
+    for tool in tools_denovo:
+      if tool not in tools['de_novo']:
+        tools['de_novo'].append(tool)
+    for tool in tools_closed_ref:
+      if tool not in tools['closed_ref']:
+        tools['closed_ref'].append(tool)
+    for tool in tools_open_ref:
+      if tool not in tools['open_ref']:
+        tools['open_ref'].append(tool)
 
     # genes
     datatypes = ['16S', '18S']
 
     # OTU picking method
-    picking = ['de_novo', 'closed_ref', 'open_ref']
-
-    # list of studies per gene
-    studies = {'16S': ['1685', '1686', '449', '632'],
-               '18S': ['2107']}
-
-    # tools per OTU picking method
-    tools = {'de_novo': ['sumaclust', 'uclust', 'usearch61', 'usearch', 'swarm', 'uparse_q3', 'uparse_q16'],
-             'closed_ref': ['sortmerna', 'uclust', 'usearch61', 'usearch'],
-             'open_ref': ['sortmerna_sumaclust', 'uclust', 'usearch61']}
+    methods = ['de_novo', 'closed_ref', 'open_ref']
 
     # sampling depths for each study (determined using output of run_summarize_tables.py)
     sample_depth_dn = {'449': ['100', '200', '380'],
@@ -87,7 +113,7 @@ def main():
     # ex. 16S
     for datatype in datatypes:
         # ex. closed_ref
-        for method in picking:
+        for method in methods:
             otu_table = "otu_table_mc2.biom"
             # ex. 1685
             for study in studies[datatype]:
@@ -96,7 +122,7 @@ def main():
                     search_dir = os.path.join(rootdir, datatype, method, "%s_%s" % (tool, study)) 
                     # OTU table doesn't exist (tool probably failed on this study)
                     if not os.path.isfile(os.path.join(search_dir, otu_table)):
-                        print "ERROR: %s does not exist" % os.path.join(search_dir, otu_table)
+                        print "skipping %s does not exist" % os.path.join(search_dir, otu_table)
                         continue
                     outdir = os.path.join(outdir_root, datatype, method, "%s_%s" % (tool, study))
                     if not os.path.exists(outdir):
@@ -117,7 +143,7 @@ def main():
                                                 os.path.join(outdir, "otu_table_even%s.biom" % depth),
                                                 "-d",
                                                 depth]
-                            print "command = ", single_rare_command
+                            #print "command = ", single_rare_command
                             proc = Popen(single_rare_command,
                                          stdout=PIPE,
                                          stderr=PIPE,
@@ -133,7 +159,7 @@ def main():
                     if not os.path.exists(search_dir):
                         continue
 
-                    print "outdir = ", search_dir
+                    #print "outdir = ", search_dir
 
                     if (method == "closed_ref" and sample_depth_cr[study] is not ''):
                         sample_depths = sample_depth_cr[study]
@@ -155,7 +181,7 @@ def main():
                                                      os.path.join(search_dir, "alpha_div_even%s.txt" % depth),
                                                      "-t",
                                                      tree]
-                            print "command = ", alpha_div_command
+                            #print "command = ", alpha_div_command
                             proc = Popen(alpha_div_command,
                                          stdout=PIPE,
                                          stderr=PIPE,
@@ -180,7 +206,7 @@ def main():
                         file_s = os.path.join(
                             outdir_root, datatype, method, "%s_%s" % (tool, study), "alpha_div_even%s.txt" % depth)
                         if not os.path.isfile(file_s):
-                            print "file = %s does not exist" % file_s
+                            print "skipping %s does not exist" % file_s
                             tools_not_to_plot.append(tool)
                             break
                     
@@ -190,7 +216,7 @@ def main():
                 num_groups = len(tools[method])
                 num_time_points = len(sample_depths)
                 labels = tools[method]
-                print "labels = ",labels
+                #print "labels = ",labels
                 labels_to_remove = []
                 xticklabels = sample_depths
                 data_oo = zeros((num_groups, num_time_points), dtype=list)
@@ -202,7 +228,7 @@ def main():
                         depth = sample_depths[j]
                         search_dir = os.path.join(outdir_root, datatype, method, "%s_%s" % (tool, study))
                         file_s = os.path.join(search_dir, "alpha_div_even%s.txt" % depth)
-                        print "file = %s" % file_s
+                        #print "file = %s" % file_s
                         pd_list = []
                         oo_list = []
                         with open(file_s, 'U') as collection:
