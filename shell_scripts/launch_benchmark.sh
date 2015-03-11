@@ -60,7 +60,7 @@ num_jobs=1
 
 # list of 16S studies to analyze (each study must be separated by a space)
 #studies="even staggered 1685 1686 1688 449 632"
-studies_bac="staggered 1688"
+studies_bac="1688"
 
 # subset of $studies_bac that are simulated or mock (to be passed to
 # run_compute_precision_recall.py)
@@ -146,39 +146,40 @@ bash $otu_clustering/shell_scripts/commands_16S.sh $gg_reference \
 #    "${qsub_params}"
 
 # remove singleton OTUs (OTUs comprising of only 1 read) from the final OTU tables
-mkdir $output_dir/run_filter_singleton_otus
-python $otu_clustering/python_scripts/run_filter_singleton_otus.py \
-    $output_dir/program_results $output_dir/run_filter_singleton_otus \
-    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
+#mkdir $output_dir/run_filter_singleton_otus
+#python $otu_clustering/python_scripts/run_filter_singleton_otus.py \
+#    $output_dir/program_results $output_dir/run_filter_singleton_otus \
+#    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
 # summarize taxa for all BIOM tables (not including singletons)
-mkdir $output_dir/run_summarize_taxa
-python $otu_clustering/python_scripts/run_summarize_taxa.py \
-    $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
-    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
+#mkdir $output_dir/run_summarize_taxa
+#python $otu_clustering/python_scripts/run_summarize_taxa.py \
+#    $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
+#    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
 # summarize filtered OTU tables
-mkdir $output_dir/run_summarize_tables
-python $otu_clustering/python_scripts/run_summarize_tables.py \
-    $output_dir/run_filter_singleton_otus $output_dir/run_summarize_tables \
-    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
+#mkdir $output_dir/run_summarize_tables
+#python $otu_clustering/python_scripts/run_summarize_tables.py \
+#    $output_dir/run_filter_singleton_otus $output_dir/run_summarize_tables \
+#    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
 # compute true positive, false positive, false negative, precision, recall,
 # F-measure and FP-chimera, FP-known, FP-other metrics using the summarized
 # taxonomy results
-mkdir $output_dir/run_compute_precision_recall
-python $otu_clustering/python_scripts/run_compute_precision_recall.py \
-    $output_dir/program_results $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
-    $output_dir/run_summarize_tables $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
-    $blast_nt "${simulated_mock_studies_bac}" "${simulated_mock_studies_euk}" \
-    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
-    $datasets/expected_taxonomies
+#mkdir $output_dir/run_compute_precision_recall
+#python $otu_clustering/python_scripts/run_compute_precision_recall.py \
+#    $output_dir/program_results $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
+#    $output_dir/run_summarize_tables $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
+#    $blast_nt "${simulated_mock_studies_bac}" "${simulated_mock_studies_euk}" \
+#    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
+#    $datasets/expected_taxonomies
 
 # generate alpha diversity plots (if additional studies are added to the
 # benchmark, their sampling depths should be also added to the
 # run_single_rarefaction_and_plot.py)
-mkdir $output_dir/run_single_rarefaction_and_plot
-python $otu_clustering/python_scripts/run_single_rarefaction_and_plot.py \
-    $output_dir/run_filter_singleton_otus $output_dir/run_single_rarefaction_and_plot \
-    $output_dir/program_results $gg_tree $silva_tree $datasets/mapping_files \
-    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
+#mkdir $output_dir/run_single_rarefaction_and_plot
+#python $otu_clustering/python_scripts/run_single_rarefaction_and_plot.py \
+#    $output_dir/run_filter_singleton_otus $output_dir/run_single_rarefaction_and_plot \
+#    $output_dir/program_results $gg_tree $silva_tree $datasets/mapping_files \
+#    "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
+
