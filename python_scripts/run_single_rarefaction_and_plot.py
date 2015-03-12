@@ -117,6 +117,12 @@ def main():
             otu_table = "otu_table_mc2.biom"
             # ex. 1685
             for study in studies[datatype]:
+                if (method == "closed_ref" and study not in sample_depth_cr[study]):
+                    continue
+                elif (method == "de_novo" and study not in sample_depth_dn[study]):
+                    continue
+                elif (method == "open_ref" and study not in sample_depth_or[study]):
+                    continue
                 # ex. swarm
                 for tool in tools[method]:
                     search_dir = os.path.join(rootdir, datatype, method, "%s_%s" % (tool, study)) 
