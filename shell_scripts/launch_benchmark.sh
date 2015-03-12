@@ -67,6 +67,10 @@ studies_bac="staggered 1688"
 #simulated_mock_studies_bac="even staggered 1685 1688"
 simulated_mock_studies_bac="staggered 1688"
 
+# subset of $studies_bac that are environmental (to be passed to
+# run_beta_diversity_and_procrustes.py)
+env_studies_bac="632 449"
+
 # list of 18S studies to analyze (each study must be separated by a space)
 #studies_euk="nematodes 2107"
 studies_euk="nematodes"
@@ -74,6 +78,10 @@ studies_euk="nematodes"
 # subset of $studies_euk that are simulated or mock (to be passed to
 # run_compute_precision_recall.py)
 simulated_mock_studies_euk="nematodes"
+
+# subset of $studies_euk that are environmental (to be passed to
+# run_beta_diversity_and_procrustes.py)
+env_studies_euk="2107"
 
 # lists of tools for each method
 # these lists will only be used in subsequent scripts after commands_16.sh
@@ -86,6 +94,9 @@ tools_open_ref="sortmerna_sumaclust uclust usearch61"
 
 # qsub params
 qsub_params="-k oe -q long8gb -l nodes=1:ppn=$num_threads -l walltime=120:00:00"
+
+# coordinate matrices to be used in run_beta_diversity_and_procrustes.py
+coordinate_matrices="weighted unweighted"
 
 ###########################################
 
@@ -106,8 +117,8 @@ qsub_params="-k oe -q long8gb -l nodes=1:ppn=$num_threads -l walltime=120:00:00"
 studies_path_qiime=$datasets/QIIME_filtered
 studies_path_uparse=$datasets/UPARSE_not_filtered_QIIME_label_format
 
-mkdir $output_dir
-mkdir $output_dir/program_results
+#mkdir $output_dir
+#mkdir $output_dir/program_results
 
 # simulate even / staggered reads 
 #mkdir $output_dir/simulated_reads
@@ -187,4 +198,18 @@ python $otu_clustering/python_scripts/run_single_rarefaction_and_plot.py \
     $output_dir/run_filter_singleton_otus $output_dir/run_single_rarefaction_and_plot \
     $output_dir/program_results $gg_tree $silva_tree $datasets/mapping_files \
     "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
+
+# Run QIIME's beta-diversity and Procrustes analysis for all tools vs. UCLUST (default)
+echo "Step 6: Run QIIME's beta-diversity and Procrustes analysis"
+mkdir $output_dir/run_beta_diversity_and_procrustes
+mkdir $output_dir/run_beta_diversity_and_procrustes/beta_diversity
+mkdir $output_dir/run_beta_diversity_and_procrustes/procrustes
+python $otu_clustering/python_scripts/run_beta_diversity_and_procrustes.py \
+    $output_dir/run_filter_singleton_otus \
+    $output_dir/run_beta_diversity_and_procrustes/beta_diversity \
+    $output_dir/run_beta_diversity_and_procrustes/procrustes \
+    $output_dir/program_results $gg_tree $silva_tree \
+    $datasets/mapping_files "${env_studies_bac}" "${env_studies_euk}" \
+    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
+    $coordinate_matrices
 

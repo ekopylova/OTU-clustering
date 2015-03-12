@@ -30,7 +30,94 @@ mpl.use('agg')
 
 import matplotlib.pyplot as plt
 import brewer2mpl
- 
+
+
+def color_bp(bp, color):
+    c = array(color) * 0.5
+    c = tuple(c)
+
+    for x in bp['boxes']: 
+        plt.setp(x, color=c)
+        x.set_facecolor(color)
+    for x in bp['medians']:
+        plt.setp(x, color=c)
+    for x in bp['whiskers']: 
+        plt.setp(x, color=c)
+    for x in bp['fliers']: 
+        plt.setp(x, color=c)
+    for x in bp['caps']:
+        plt.setp(x, color=c)
+
+
+# code (modified) from https://github.com/samfway/biotm/blob/master/plotting/grouped_box.py
+def make_separated_box(ax, data, labels=None, colors=None,
+                       xticklabels=[], width=0.8, legend_pos=0,
+                       dot_mean=False, mean_color='w'):
+    if labels and len(data) != len(labels):
+        raise ValueError('Number of labels must match ',
+                         'size of data matrix.')
+
+    if colors and len(colors) != len(labels):
+        raise ValueError('Number of colors must match ',
+                         'size of data matrix.')
+
+    num_groups = len(labels)
+    num_points = data.shape[1]
+
+    if not colors:
+        num_colors = max(3, num_groups)
+        colors = brewer2mpl.get_map('Set2', 
+                                    'qualitative', 
+                                    num_colors).mpl_colors
+    current_pos = 0
+    xticks = []
+    xlabels = []
+
+    for i in xrange(num_groups):
+        color = colors[i]
+        for j in xrange(num_points):
+            bp = ax.boxplot(data[i][j], positions=[current_pos],
+                            widths=[width], patch_artist=True)
+            xticks.append(current_pos)
+            xlabels.append(xticklabels[j] + " (%s)" % len(data[i][j])) 
+            color_bp(bp, color)
+            if dot_mean:
+                means = [mean(data[i][j])]
+                ax.plot([current_pos], means, linestyle='None', 
+                    marker='o', markerfacecolor=mean_color,
+                    markeredgecolor='k')
+            current_pos += 1.6 
+        current_pos += 2
+
+    if labels:
+        lgd = legend_hack(ax, labels, colors, legend_pos)
+    else:
+        lgd = None
+
+    ax.set_xlim(-1,current_pos-2)
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xlabels)
+
+    return lgd
+
+
+def legend_hack(ax, labels, colors, legend_pos):
+    """ Hack a legend onto a plot. 
+    """ 
+    handles = []
+    for i, l in enumerate(labels):
+        temp = plt.Line2D(range(1), range(1), 
+                          linewidth=2,
+                          color=colors[i])
+        handles.append(temp)
+    #plt.legend(handles, labels, numpoints=1, loc=legend_pos)
+    lgd = plt.legend(handles, labels, numpoints=1, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    #lgd = plt.legend(handles, labels, numpoints=1, bbox_to_anchor=(0, -0.7), loc='lower left', borderaxespad=0.)
+    for handle in handles:
+        handle.set_visible(False)
+
+    return lgd 
+
 
 def main():
 
@@ -270,89 +357,6 @@ def main():
                 
                 fig.savefig(os.path.join(plots_dir, 'pd_whole_tree.png'), bbox_extra_artists=(lgd,), bbox_inches='tight')
 
-def color_bp(bp, color):
-    c = array(color) * 0.5
-    c = tuple(c)
-
-    for x in bp['boxes']: 
-        plt.setp(x, color=c)
-        x.set_facecolor(color)
-    for x in bp['medians']:
-        plt.setp(x, color=c)
-    for x in bp['whiskers']: 
-        plt.setp(x, color=c)
-    for x in bp['fliers']: 
-        plt.setp(x, color=c)
-    for x in bp['caps']:
-        plt.setp(x, color=c)
-
-# code (modified) from https://github.com/samfway/biotm/blob/master/plotting/grouped_box.py
-def make_separated_box(ax, data, labels=None, colors=None,
-                       xticklabels=[], width=0.8, legend_pos=0,
-                       dot_mean=False, mean_color='w'):
-    if labels and len(data) != len(labels):
-        raise ValueError('Number of labels must match ',
-                         'size of data matrix.')
-
-    if colors and len(colors) != len(labels):
-        raise ValueError('Number of colors must match ',
-                         'size of data matrix.')
-
-    num_groups = len(labels)
-    num_points = data.shape[1]
-
-    if not colors:
-        num_colors = max(3, num_groups)
-        colors = brewer2mpl.get_map('Set2', 
-                                    'qualitative', 
-                                    num_colors).mpl_colors
-    current_pos = 0
-    xticks = []
-    xlabels = []
-
-    for i in xrange(num_groups):
-        color = colors[i]
-        for j in xrange(num_points):
-            bp = ax.boxplot(data[i][j], positions=[current_pos],
-                            widths=[width], patch_artist=True)
-            xticks.append(current_pos)
-            xlabels.append(xticklabels[j] + " (%s)" % len(data[i][j])) 
-            color_bp(bp, color)
-            if dot_mean:
-                means = [mean(data[i][j])]
-                ax.plot([current_pos], means, linestyle='None', 
-                    marker='o', markerfacecolor=mean_color,
-                    markeredgecolor='k')
-            current_pos += 1.6 
-        current_pos += 2
-
-    if labels:
-        lgd = legend_hack(ax, labels, colors, legend_pos)
-    else:
-        lgd = None
-
-    ax.set_xlim(-1,current_pos-2)
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(xlabels)
-
-    return lgd
-
-def legend_hack(ax, labels, colors, legend_pos):
-    """ Hack a legend onto a plot. 
-    """ 
-    handles = []
-    for i, l in enumerate(labels):
-        temp = plt.Line2D(range(1), range(1), 
-                          linewidth=2,
-                          color=colors[i])
-        handles.append(temp)
-    #plt.legend(handles, labels, numpoints=1, loc=legend_pos)
-    lgd = plt.legend(handles, labels, numpoints=1, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    #lgd = plt.legend(handles, labels, numpoints=1, bbox_to_anchor=(0, -0.7), loc='lower left', borderaxespad=0.)
-    for handle in handles:
-        handle.set_visible(False)
-
-    return lgd 
                                 
 if __name__ == '__main__':
     main()

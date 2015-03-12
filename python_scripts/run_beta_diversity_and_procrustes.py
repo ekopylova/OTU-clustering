@@ -22,37 +22,71 @@ from glob import glob
 
 if __name__ == '__main__':
 
-    # output results for beta diversity analysis
-    outdir_beta = "/scratch/Users/evko1434/working_dir/beta_diversity_through_plots"
-
-    # output results for Procrustes analysis
-    outdir_procrustes = "/scratch/Users/evko1434/working_dir/procrustes_analyses"
-
     # original BIOM tables excl. singletons directory
     # (same outdir_root path as in run_filter_singleton_otus.py)
-    rootdir = "/scratch/Users/evko1434/working_dir/otu_tables_mc2"
+    rootdir = sys.argv[1]
+
+    # output results for beta diversity analysis
+    outdir_beta = sys.argv[2]
+
+    # output results for Procrustes analysis
+    outdir_procrustes = sys.argv[3]
+
+    # trees (generated during de novo/open ref OTU picking, will be in
+    # same directory as all results)
+    treedir = sys.argv[4]
 
     # trees for closed-reference analysis (16S distributed with Greengenes, 18S built)
-    tree_fp = {'16S': "/scratch/Users/evko1434/reference/gg_13_8_otus/trees/97_otus.tree",
-               '18S': "/scratch/Users/evko1434/reference/Silva_111_post/trees/97_Silva_111_rep_set_pfiltered.tre"}
+    tree_fp = {'16S': "", '18S': ""}
+    tree_fp['16S'] = sys.argv[5]
+    tree_fp['18S'] = sys.argv[6]
 
     # mapping files directory
-    mapping_dir = "/scratch/Users/evko1434/supplemental_otu_clustering_datasets/mapping_files"
+    mapping_dir = sys.argv[7]
+
+    # studies 16S
+    studies_bac = sys.argv[8].split()
+
+    # studies 18S
+    studies_euk = sys.argv[9].split()
+
+    # list of studies for each gene type
+    studies = {'16S': [], '18S': []}
+
+    for study in studies_bac:
+      if study not in studies['16S']:
+        studies['16S'].append(study)
+
+    for study in studies_euk:
+      if study not in studies['18S']:
+        studies['18S'].append(study)
+
+    # tools
+    tools_denovo = sys.argv[10].split()
+    tools_closed_ref = sys.argv[11].split()
+    tools_open_ref = sys.argv[12].split()
+
+    # list of tools for each OTU picking method
+    tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
+
+    for tool in tools_denovo:
+      if tool not in tools['de_novo']:
+        tools['de_novo'].append(tool)
+    for tool in tools_closed_ref:
+      if tool not in tools['closed_ref']:
+        tools['closed_ref'].append(tool)
+    for tool in tools_open_ref:
+      if tool not in tools['open_ref']:
+        tools['open_ref'].append(tool)
+
+    # coordinate matrices
+    coordinate_matrices = sys.argv[13].split()
 
     # genes
     datatypes = ['16S', '18S']
 
     # OTU picking methods
-    picking = ['closed_ref', 'de_novo', 'open_ref']
-
-    # list of studies per gene type
-    studies = {'16S': ['632', '449'],
-               '18S': ['2107']}
-
-    # list of tools per OTU picking method
-    tools = {'de_novo': ['sumaclust', 'swarm', 'uclust', 'usearch61', 'usearch', 'uparse_q3', 'uparse_q16'],
-             'closed_ref': ['sortmerna', 'uclust', 'usearch', 'usearch61'],
-             'open_ref': ['sortmerna_sumaclust', 'uclust', 'usearch61']}
+    methods = ['closed_ref', 'de_novo', 'open_ref']
 
     # depth of coverage for even sampling (based on results of run_summarize_tables.py)
     sampling_depth_cr = {'449': '380',
@@ -74,13 +108,10 @@ if __name__ == '__main__':
                          '1919': '100',
                          '2020': '1000'}
 
-    # coordinate matrices for UniFrac
-    coordinate_matrices = ['weighted', 'unweighted']
-
     # ex. 16S
     for datatype in datatypes:
         # ex. closed_ref
-        for method in picking:
+        for method in methods:
             # ex. 449
             for study in studies[datatype]:
                 # ex. swarm
@@ -128,10 +159,9 @@ if __name__ == '__main__':
                             if stderr:
                                 print stderr
                         else:
-                            print "OTU table %s not found" % os.path.join(search_dir, otu_table)
+                            print "skpping %s not found" % os.path.join(search_dir, otu_table)
             # run procrustes analysis
             # loop through all the study output folders
-            print "Run procrustes analysis .."
             for study in studies[datatype]:
                 # loop through all the tools
                 for tool in tools[method]:
@@ -140,7 +170,6 @@ if __name__ == '__main__':
                     if not os.path.exists(search_dir):
                         continue
                     outdir = os.path.join(outdir_procrustes, datatype, method, "uclust_vs_%s_%s" % (tool, study))
-                    print "outdir = ", outdir
                     if not os.path.exists(outdir):
                             for matrix in coordinate_matrices:
                                 matrices = "%s,%s" % (
@@ -153,7 +182,6 @@ if __name__ == '__main__':
                                                                          matrices,
                                                                          "-o",
                                                                          os.path.join(outdir, matrix)]
-                                print "command = ",transform_coordinate_matrices_command
                                 proc = Popen(transform_coordinate_matrices_command,
                                              stdout=PIPE,
                                              stderr=PIPE,
@@ -172,7 +200,6 @@ if __name__ == '__main__':
                                                         os.path.join(outdir, matrix, "plots"),
                                                         "-m",
                                                         os.path.join(mapping_dir, "study_%s_mapping_file.txt" % study)]
-                                print "command = ",make_emperor_command
                                 proc = Popen(make_emperor_command,
                                              stdout=PIPE,
                                              stderr=PIPE,
