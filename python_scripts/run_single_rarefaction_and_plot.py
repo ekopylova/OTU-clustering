@@ -233,8 +233,8 @@ def main():
                         with open(file_s, 'U') as collection:
                             next(collection)
                             for line in collection:
-                                    pd_whole_tree = float(line.strip().split()[1])
-                                    observed_otus = float(line.strip().split()[3])
+                                pd_whole_tree = float(line.strip().split()[1])
+                                observed_otus = float(line.strip().split()[3])
                                 pd_list.append(pd_whole_tree)
                                 oo_list.append(observed_otus)
                             data_oo[i][j] = oo_list
