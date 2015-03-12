@@ -181,11 +181,10 @@ def main():
                                                      os.path.join(search_dir, "alpha_div_even%s.txt" % depth),
                                                      "-t",
                                                      tree]
-                            #print "command = ", alpha_div_command
-                            proc = Popen(alpha_div_command,
-                                         stdout=PIPE,
-                                         stderr=PIPE,
-                                         close_fds=True)
+                                proc = Popen(alpha_div_command,
+                                             stdout=PIPE,
+                                             stderr=PIPE,
+                                             close_fds=True)
                             proc.wait()
                             stdout, stderr = proc.communicate()
                             if stderr:
