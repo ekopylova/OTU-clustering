@@ -174,17 +174,17 @@ def main():
                     for depth in sample_depths:
                         # output file doesn't already exist
                         if not os.path.isfile(os.path.join(search_dir, "alpha_div_even%s.txt" % depth)):
-                                alpha_div_command = ["alpha_diversity.py",
-                                                     "-i",
-                                                     os.path.join(search_dir, "otu_table_even%s.biom" % depth),
-                                                     "-o",
-                                                     os.path.join(search_dir, "alpha_div_even%s.txt" % depth),
-                                                     "-t",
-                                                     tree]
-                                proc = Popen(alpha_div_command,
-                                             stdout=PIPE,
-                                             stderr=PIPE,
-                                             close_fds=True)
+                            alpha_div_command = ["alpha_diversity.py",
+                                                 "-i",
+                                                 os.path.join(search_dir, "otu_table_even%s.biom" % depth),
+                                                 "-o",
+                                                 os.path.join(search_dir, "alpha_div_even%s.txt" % depth),
+                                                 "-t",
+                                                 tree]
+                            proc = Popen(alpha_div_command,
+                                         stdout=PIPE,
+                                         stderr=PIPE,
+                                         close_fds=True)
                             proc.wait()
                             stdout, stderr = proc.communicate()
                             if stderr:
