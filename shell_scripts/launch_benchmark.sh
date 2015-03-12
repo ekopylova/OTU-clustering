@@ -146,18 +146,21 @@ mkdir $output_dir/program_results
 #    "${qsub_params}"
 
 # remove singleton OTUs (OTUs comprising of only 1 read) from the final OTU tables
+echo "Step 1: remove singleton OTUs from the final OTU tables"
 mkdir $output_dir/run_filter_singleton_otus
 python $otu_clustering/python_scripts/run_filter_singleton_otus.py \
     $output_dir/program_results $output_dir/run_filter_singleton_otus \
     "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
 # summarize taxa for all BIOM tables (not including singletons)
+echo "Step 2: summarize taxonomies for all BIOM tables (not including singletons)"
 mkdir $output_dir/run_summarize_taxa
 python $otu_clustering/python_scripts/run_summarize_taxa.py \
     $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
     "${studies_bac}" "${studies_euk}" "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
-# summarize filtered OTU tables
+# summarize all BIOM tables (not including singletons)
+echo "Step 3: summarize all BIOM tables (not including singletons)"
 mkdir $output_dir/run_summarize_tables
 python $otu_clustering/python_scripts/run_summarize_tables.py \
     $output_dir/run_filter_singleton_otus $output_dir/run_summarize_tables \
@@ -166,6 +169,7 @@ python $otu_clustering/python_scripts/run_summarize_tables.py \
 # compute true positive, false positive, false negative, precision, recall,
 # F-measure and FP-chimera, FP-known, FP-other metrics using the summarized
 # taxonomy results
+echo "Step 4: compute TP, FP, FN, precision, recall & other metrics using the summarized taxonomies"
 mkdir $output_dir/run_compute_precision_recall
 python $otu_clustering/python_scripts/run_compute_precision_recall.py \
     $output_dir/program_results $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
@@ -177,6 +181,7 @@ python $otu_clustering/python_scripts/run_compute_precision_recall.py \
 # generate alpha diversity plots (if additional studies are added to the
 # benchmark, their sampling depths should be also added to the
 # run_single_rarefaction_and_plot.py)
+echo "Step 5: Generate alpha diversity plots"
 mkdir $output_dir/run_single_rarefaction_and_plot
 python $otu_clustering/python_scripts/run_single_rarefaction_and_plot.py \
     $output_dir/run_filter_singleton_otus $output_dir/run_single_rarefaction_and_plot \
