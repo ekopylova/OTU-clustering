@@ -117,11 +117,11 @@ def main():
             otu_table = "otu_table_mc2.biom"
             # ex. 1685
             for study in studies[datatype]:
-                if (method == "closed_ref" and study not in sample_depth_cr[study]):
+                if (method == "closed_ref" and study not in sample_depth_cr):
                     continue
-                elif (method == "de_novo" and study not in sample_depth_dn[study]):
+                elif (method == "de_novo" and study not in sample_depth_dn):
                     continue
-                elif (method == "open_ref" and study not in sample_depth_or[study]):
+                elif (method == "open_ref" and study not in sample_depth_or):
                     continue
                 # ex. swarm
                 for tool in tools[method]:
