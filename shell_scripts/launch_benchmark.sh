@@ -60,7 +60,7 @@ num_jobs=1
 
 # list of 16S studies to analyze (each study must be separated by a space)
 #studies="even staggered 1685 1686 1688 449 632"
-studies_bac="1688"
+studies_bac="staggered 1688"
 
 # subset of $studies_bac that are simulated or mock (to be passed to
 # run_compute_precision_recall.py)

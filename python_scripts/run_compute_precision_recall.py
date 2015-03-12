@@ -516,26 +516,26 @@ def main(argv):
     # ex. 16S
     for datatype in datatypes:
         sys.stdout.write("\n%s\n" % datatype)
-        # ex. closed_ref
-        for method in methods:
-            sys.stdout.write("%s\n" % method)
-            # ex. 1685
-            for study in studies[datatype]:
-                sys.stdout.write("%s\n" % study)
-                if study == "nematodes":
-                    tax_level = "L5"
-                else:
-                    tax_level = "L6"
-                expected_f = os.path.join(expected_fp, study, "%s_%s.txt" % (study, tax_level))
+        # ex. 1685
+        for study in studies[datatype]:
+            sys.stdout.write("%s\n" % study)
+            if study == "nematodes":
+                tax_level = "L5"
+            else:
+                tax_level = "L6"
+            expected_f = os.path.join(expected_fp, study, "%s_%s.txt" % (study, tax_level))
 
-                expected_tax = set()
-                with open(expected_f, 'U') as expected:
-                    for line in expected:
-                        if line.startswith('#'):
-                            continue
-                        else:
-                            tax = line.split()[0]
-                            expected_tax.add(tax)
+            expected_tax = set()
+            with open(expected_f, 'U') as expected:
+                for line in expected:
+                    if line.startswith('#'):
+                        continue
+                    else:
+                        tax = line.split()[0]
+                        expected_tax.add(tax)
+            # ex. closed_ref
+            for method in methods:
+                sys.stdout.write("%s\n" % method)
                 # ex. swarm
                 for tool in tools[method]:
                     # these lists will contain mean number of reads + stdev for TP, FP-known,
