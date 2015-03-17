@@ -138,18 +138,17 @@ if __name__ == '__main__':
 
                         # BIOM table exists
                         if os.path.isfile(os.path.join(search_dir, otu_table)):
-                                beta_div_command = ["beta_diversity_through_plots.py",
-                                                    "-i",
-                                                    os.path.join(search_dir, otu_table),
-                                                    "-o",
-                                                    outdir,
-                                                    "-t",
-                                                    tree,
-                                                    "-m",
-                                                    os.path.join(mapping_dir, "study_%s_mapping_file.txt" % study),
-                                                    "-e",
-                                                    sample_depth]
-                            print "command = ", beta_div_command
+                            beta_div_command = ["beta_diversity_through_plots.py",
+                                                "-i",
+                                                os.path.join(search_dir, otu_table),
+                                                "-o",
+                                                outdir,
+                                                "-t",
+                                                tree,
+                                                "-m",
+                                                os.path.join(mapping_dir, "study_%s_mapping_file.txt" % study),
+                                                "-e",
+                                                sample_depth]
                             proc = Popen(beta_div_command,
                                          stdout=PIPE,
                                          stderr=PIPE,
@@ -171,40 +170,40 @@ if __name__ == '__main__':
                         continue
                     outdir = os.path.join(outdir_procrustes, datatype, method, "uclust_vs_%s_%s" % (tool, study))
                     if not os.path.exists(outdir):
-                            for matrix in coordinate_matrices:
-                                matrices = "%s,%s" % (
-                                    os.path.join(
-                                        outdir_beta, datatype, method, "uclust_%s" % study, "%s_unifrac_pc.txt" % matrix), os.path.join(search_dir, "%s_unifrac_pc.txt" % matrix))
+                        for matrix in coordinate_matrices:
+                            matrices = "%s,%s" % (
+                                os.path.join(
+                                    outdir_beta, datatype, method, "uclust_%s" % study, "%s_unifrac_pc.txt" % matrix), os.path.join(search_dir, "%s_unifrac_pc.txt" % matrix))
 
-                                # transform coordiate matrices
-                                transform_coordinate_matrices_command = ["transform_coordinate_matrices.py",
-                                                                         "-i",
-                                                                         matrices,
-                                                                         "-o",
-                                                                         os.path.join(outdir, matrix)]
-                                proc = Popen(transform_coordinate_matrices_command,
-                                             stdout=PIPE,
-                                             stderr=PIPE,
-                                             close_fds=True)
-                                proc.wait()
-                                stdout, stderr = proc.communicate()
-                                if stderr:
-                                    print stderr
-                    
-                                # plot emperor plots
-                                make_emperor_command = ["make_emperor.py",
-                                                        "-c",
-                                                        "-i",
-                                                        os.path.join(outdir, matrix),
-                                                        "-o",
-                                                        os.path.join(outdir, matrix, "plots"),
-                                                        "-m",
-                                                        os.path.join(mapping_dir, "study_%s_mapping_file.txt" % study)]
-                                proc = Popen(make_emperor_command,
-                                             stdout=PIPE,
-                                             stderr=PIPE,
-                                             close_fds=True)
-                                proc.wait()
-                                stdout, stderr = proc.communicate()
-                                if stderr:
-                                    print stderr
+                            # transform coordiate matrices
+                            transform_coordinate_matrices_command = ["transform_coordinate_matrices.py",
+                                                                     "-i",
+                                                                     matrices,
+                                                                     "-o",
+                                                                     os.path.join(outdir, matrix)]
+                            proc = Popen(transform_coordinate_matrices_command,
+                                         stdout=PIPE,
+                                         stderr=PIPE,
+                                         close_fds=True)
+                            proc.wait()
+                            stdout, stderr = proc.communicate()
+                            if stderr:
+                                print stderr
+                
+                            # plot emperor plots
+                            make_emperor_command = ["make_emperor.py",
+                                                    "-c",
+                                                    "-i",
+                                                    os.path.join(outdir, matrix),
+                                                    "-o",
+                                                    os.path.join(outdir, matrix, "plots"),
+                                                    "-m",
+                                                    os.path.join(mapping_dir, "study_%s_mapping_file.txt" % study)]
+                            proc = Popen(make_emperor_command,
+                                         stdout=PIPE,
+                                         stderr=PIPE,
+                                         close_fds=True)
+                            proc.wait()
+                            stdout, stderr = proc.communicate()
+                            if stderr:
+                                print stderr
