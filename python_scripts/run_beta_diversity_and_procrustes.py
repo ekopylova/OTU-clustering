@@ -129,12 +129,12 @@ if __name__ == '__main__':
                         elif (method == "open_ref" and sampling_depth_or[study] is not ''):
                             sample_depth = sampling_depth_or[study]
                             tree = os.path.join(
-                                treedir, "program_results", datatype, method, "%s_%s" % (tool, study), "rep_set.tre")
+                                treedir, datatype, method, "%s_%s" % (tool, study), "rep_set.tre")
 
                         elif (method == "de_novo" and sampling_depth_dn[study] is not ''):
                             sample_depth = sampling_depth_dn[study]
                             tree = os.path.join(
-                                treedir, "program_results", datatype, method, "%s_%s" % (tool, study), "rep_set.tre")
+                                treedir, datatype, method, "%s_%s" % (tool, study), "rep_set.tre")
 
                         # BIOM table exists
                         if os.path.isfile(os.path.join(search_dir, otu_table)):
