@@ -72,8 +72,7 @@ simulated_mock_studies_bac="staggered 1688"
 env_studies_bac="632 449"
 
 # list of 18S studies to analyze (each study must be separated by a space)
-#studies_euk="nematodes 2107"
-studies_euk="nematodes"
+studies_euk="nematodes 2107"
 
 # subset of $studies_euk that are simulated or mock (to be passed to
 # run_compute_precision_recall.py)
@@ -180,14 +179,14 @@ python $otu_clustering/python_scripts/run_summarize_tables.py \
 # compute true positive, false positive, false negative, precision, recall,
 # F-measure and FP-chimera, FP-known, FP-other metrics using the summarized
 # taxonomy results
-echo "Step 4: compute TP, FP, FN, precision, recall & other metrics using the summarized taxonomies"
-mkdir $output_dir/run_compute_precision_recall
-python $otu_clustering/python_scripts/run_compute_precision_recall.py \
-    $output_dir/program_results $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
-    $output_dir/run_summarize_tables $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
-    $blast_nt "${simulated_mock_studies_bac}" "${simulated_mock_studies_euk}" \
-    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
-    $datasets/expected_taxonomies
+#echo "Step 4: compute TP, FP, FN, precision, recall & other metrics using the summarized taxonomies"
+#mkdir $output_dir/run_compute_precision_recall
+#python $otu_clustering/python_scripts/run_compute_precision_recall.py \
+#    $output_dir/program_results $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
+#    $output_dir/run_summarize_tables $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
+#    $blast_nt "${simulated_mock_studies_bac}" "${simulated_mock_studies_euk}" \
+#    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
+#    $datasets/expected_taxonomies
 
 # generate alpha diversity plots (if additional studies are added to the
 # benchmark, their sampling depths should be also added to the
