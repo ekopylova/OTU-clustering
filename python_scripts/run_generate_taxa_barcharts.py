@@ -137,11 +137,11 @@ if __name__ == '__main__':
                         tool1 = tool
                     labels.append(tool1)
 
-#            for taxa in abundances:
-#                sys.stdout.write("%s\t" % taxa)
-#                for tool_abu in abundances[taxa]:
-#                    sys.stdout.write("%s\t" % abundances[taxa][tool_abu])
-#                sys.stdout.write("\n")
+            for taxa in abundances:
+                sys.stdout.write("%s\t" % taxa)
+                for tool_abu in abundances[taxa]:
+                    sys.stdout.write("%s\t" % abundances[taxa][tool_abu])
+                sys.stdout.write("\n")
 
             if (study in studies_bac_mock or study in studies_euk_mock):
                 top_N_taxa = top_N_taxa_mock
