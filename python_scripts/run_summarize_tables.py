@@ -83,9 +83,12 @@ if __name__ == '__main__':
                 # ex. 1685
                 for study in studies[datatype]:
                     search_dir = os.path.join(rootdir, datatype, method, "%s_%s" % (tool, study))
-                    #print "search_dir = ",search_dir
                     outdir = os.path.join(outdir_root, datatype, method, "%s_%s" % (tool, study))
-                    #print "\toutdir = ", outdir
+                    # check BIOM table exists
+                    if not os.path.exists(os.path.join(search_dir, otu_table)):
+                        print "file %s does not exist" % os.path.join(search_dir, otu_table)
+                        continue
+                    # compute BIOM table summary if not already done
                     if not os.path.exists(outdir):
                         os.makedirs(outdir)
                         otu_table = "otu_table_mc2.biom"
