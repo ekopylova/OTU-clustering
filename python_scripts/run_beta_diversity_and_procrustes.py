@@ -81,6 +81,7 @@ if __name__ == '__main__':
 
     # coordinate matrices
     coordinate_matrices = sys.argv[13].split()
+    print "coordinate matrices = ", coordinate_matrices
 
     # genes
     datatypes = ['16S', '18S']
@@ -169,8 +170,9 @@ if __name__ == '__main__':
                     if not os.path.exists(search_dir):
                         continue
                     outdir = os.path.join(outdir_procrustes, datatype, method, "uclust_vs_%s_%s" % (tool, study))
-                    if not os.path.exists(outdir):
-                        for matrix in coordinate_matrices:
+                    
+                    for matrix in coordinate_matrices:
+                        if not os.path.exists(os.path.join(outdir, matrix)):
                             matrices = "%s,%s" % (
                                 os.path.join(
                                     outdir_beta, datatype, method, "uclust_%s" % study, "%s_unifrac_pc.txt" % matrix), os.path.join(search_dir, "%s_unifrac_pc.txt" % matrix))
@@ -207,3 +209,5 @@ if __name__ == '__main__':
                             stdout, stderr = proc.communicate()
                             if stderr:
                                 print stderr
+                        else:
+                            print "skpping %s already computed" % os.path.join(outdir, matrix)
