@@ -59,27 +59,24 @@ num_threads=10
 num_jobs=1
 
 # list of 16S studies to analyze (each study must be separated by a space)
-#studies="even staggered 1685 1686 1688 449 632"
-studies_bac="staggered 1688"
+studies_bac="staggered 1685 1686 1688 632 449"
 
-# subset of $studies_bac that are simulated or mock (to be passed to
-# run_compute_precision_recall.py)
-#simulated_mock_studies_bac="even staggered 1685 1688"
-simulated_mock_studies_bac="staggered 1688"
+# subset of $studies_bac that are simulated
+simulated_studies_bac="staggered even"
 
-# subset of $studies_bac that are environmental (to be passed to
-# run_beta_diversity_and_procrustes.py)
+# subset of $studies_bac that are mock
+mock_studies_bac="1688 1685 1686"
+
+# subset of $studies_bac that are environmental
 env_studies_bac="632 449"
 
 # list of 18S studies to analyze (each study must be separated by a space)
 studies_euk="nematodes 2107"
 
-# subset of $studies_euk that are simulated or mock (to be passed to
-# run_compute_precision_recall.py)
-simulated_mock_studies_euk="nematodes"
+# subset of $studies_euk that mock
+mock_studies_euk="nematodes"
 
-# subset of $studies_euk that are environmental (to be passed to
-# run_beta_diversity_and_procrustes.py)
+# subset of $studies_euk that are environmental
 env_studies_euk="2107"
 
 # lists of tools for each method
@@ -184,7 +181,7 @@ python $otu_clustering/python_scripts/run_summarize_tables.py \
 #python $otu_clustering/python_scripts/run_compute_precision_recall.py \
 #    $output_dir/program_results $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
 #    $output_dir/run_summarize_tables $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
-#    $blast_nt "${simulated_mock_studies_bac}" "${simulated_mock_studies_euk}" \
+#    $blast_nt "${simulated_studies_bac} ${mock_studies_bac}" "${mock_studies_euk}" \
 #    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
 #    $datasets/expected_taxonomies
 
@@ -211,4 +208,13 @@ python $otu_clustering/python_scripts/run_beta_diversity_and_procrustes.py \
     $datasets/mapping_files "${env_studies_bac}" "${env_studies_euk}" \
     "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
     "${coordinate_matrices}"
+
+# Generate taxonomy comparison tables
+echo "Step 7: Generate taxonomy comparison tables"
+mkdir $output_dir/run_compare_taxa_summaries
+python $otu_clustering/python_scripts/run_compare_taxa_summaries.py \
+    $output_dir/run_compare_taxa_summaries $output_dir/run_summarize_taxa \
+    $datasets/mapping_files "${mock_studies_bac} ${env_studies_bac}" \
+    "${mock_studies_euk} ${env_studies_euk}" "${tools_denovo}" \
+    "${tools_closed_ref}" "${tools_open_ref}"
 

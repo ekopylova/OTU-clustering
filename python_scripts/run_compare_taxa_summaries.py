@@ -24,33 +24,59 @@ from glob import glob
 if __name__ == '__main__':
 
     # output results directory
-    outdir_root = "/scratch/Users/evko1434/working_dir/compare_taxa_summaries_mc2"
+    outdir_root = sys.argv[1]
 
     # summarized taxonomies for all tools (output of run_summarize_taxa.py)
-    rootdir = "/scratch/Users/evko1434/working_dir/summarize_taxa_mc2"
+    rootdir = sys.argv[2]
 
     # mapping files directory
-    mapping_dir = "/scratch/Users/evko1434/supplemental_otu_clustering_datasets/mapping_files"
+    mapping_dir = sys.argv[3]
+
+    # studies 16S
+    studies_bac = sys.argv[4].split()
+
+    # studies 18S
+    studies_euk = sys.argv[5].split()
 
     # genes
     datatypes = ['16S', '18S']
 
     # OTU picking methods
-    picking = ['de_novo', 'closed_ref', 'open_ref']
+    methods = ['de_novo', 'closed_ref', 'open_ref']
 
-    # studies per genes
-    studies = {'16S': ['1685', '1686', '1688', '449', '632'],
-               '18S': ['nematodes', '2107']}
+    # list of studies for each gene type
+    studies = {'16S': [], '18S': []}
 
-    # tools per OTU picking method
-    tools = {'de_novo': ['swarm', 'uclust', 'sumaclust', 'usearch', 'usearch61', 'uparse_q3', 'uparse_q16'],
-             'closed_ref': ['sortmerna', 'uclust', 'usearch', 'usearch61'],
-             'open_ref': ['sortmerna_sumaclust', 'uclust', 'usearch61']}
+    for study in studies_bac:
+      if study not in studies['16S']:
+        studies['16S'].append(study)
+
+    for study in studies_euk:
+      if study not in studies['18S']:
+        studies['18S'].append(study)
+
+    # tools
+    tools_denovo = sys.argv[6].split()
+    tools_closed_ref = sys.argv[7].split()
+    tools_open_ref = sys.argv[8].split()
+
+    # list of tools for each OTU picking method
+    tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
+
+    for tool in tools_denovo:
+      if tool not in tools['de_novo']:
+        tools['de_novo'].append(tool)
+    for tool in tools_closed_ref:
+      if tool not in tools['closed_ref']:
+        tools['closed_ref'].append(tool)
+    for tool in tools_open_ref:
+      if tool not in tools['open_ref']:
+        tools['open_ref'].append(tool)
 
     # ex. 16S
     for datatype in datatypes:
         # ex. closed_ref
-        for method in picking:
+        for method in methods:
             # ex. 1685
             for study in studies[datatype]:
                 i = 1
@@ -77,7 +103,6 @@ if __name__ == '__main__':
                                                                "paired",
                                                                "-o",
                                                                outdir]
-                            print "command = ", compare_taxa_summaries_command
                             proc = Popen(compare_taxa_summaries_command,
                                          stdout=PIPE,
                                          stderr=PIPE,
@@ -86,6 +111,8 @@ if __name__ == '__main__':
                             stdout, stderr = proc.communicate()
                             if stderr:
                                 print stderr
+                        else:
+                            print "skipping %s already exists" % (outdir)
                     i = i+1
             
                 print "STUDY = ", study
