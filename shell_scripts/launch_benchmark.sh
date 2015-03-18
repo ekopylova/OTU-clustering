@@ -79,6 +79,14 @@ mock_studies_euk="nematodes"
 # subset of $studies_euk that are environmental
 env_studies_euk="2107"
 
+# number of most abundant taxonomies to include in layered barcharts
+# for mock studies
+top_N_taxa_mock="20"
+
+# number of most abundant taxonomies to include in layered barcharts
+# for environmental studies
+top_N_taxa_env="50"
+
 # lists of tools for each method
 # these lists will only be used in subsequent scripts after commands_16.sh
 # and commands_18.sh. If the user would like to add other tools to any of
@@ -217,4 +225,13 @@ python $otu_clustering/python_scripts/run_compare_taxa_summaries.py \
     $datasets/mapping_files "${mock_studies_bac} ${env_studies_bac}" \
     "${mock_studies_euk} ${env_studies_euk}" "${tools_denovo}" \
     "${tools_closed_ref}" "${tools_open_ref}"
+
+# Generate taxonomy stacked bar plots
+echo "Step 8: Generate taxonomy stacked bar plots"
+mkdir $output_dir/run_generate_taxa_barcharts
+python $otu_clustering/python_scripts/run_generate_taxa_barcharts.py \
+    $output_dir/run_generate_taxa_barcharts $output_dir/run_summarize_taxa \
+    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
+    "${mock_studies_bac}" "${env_studies_bac}" "${mock_studies_euk}" "${env_studies_euk}" \
+    $top_N_taxa_mock $top_N_taxa_env
 
