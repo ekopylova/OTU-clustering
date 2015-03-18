@@ -96,6 +96,7 @@ if __name__ == '__main__':
                 # ex. swarm
                 i=0
                 for tool in tools[method]:
+                    print tool
                     num_tools+=1
                     tax_sum_fp = os.path.join(taxa_summary_dir, datatype, method, "%s_%s" % (tool, study), "otu_table_mc2_%s.txt" % summary_level)
                     if os.path.exists(tax_sum_fp):
