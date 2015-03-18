@@ -97,6 +97,7 @@ if __name__ == '__main__':
             # ex. closed_ref
             for method in methods:
                 # ex. swarm
+                i=0
                 for tool in tools[method]:
                     tax_sum_fp = os.path.join(taxa_summary_dir, datatype, method, "%s_%s" % (tool, study), "otu_table_mc2_%s.txt" % summary_level)
                     if os.path.exists(tax_sum_fp):
@@ -114,14 +115,16 @@ if __name__ == '__main__':
                                     # new taxa not found previously by any tool,
                                     # add to dictionary and set all abundances for
                                     # other tools to 0.0
-                                    for j in range(0, i-3):
+                                    for j in range(0, i):
                                         abundances[line[0]][j] = 0.0
-                                abundances[line[0]][i-3] = total_abundance/float(num_samples)
+                                abundances[line[0]][i] = total_abundance/float(num_samples)
                         # current tool is missing some taxa previously found
                         # by other tools, set abundance for this taxa to 0.0
                         for taxa in abundances:
-                            if i-3 not in abundances[taxa]:
-                                abundances[taxa][i-3] = 0.0
+                            if i not in abundances[taxa]:
+                                abundances[taxa][i] = 0.0
+
+                        i=+1
                     else:
                         print "skipping %s does not exist" % tax_sum_fp
                         continue
