@@ -91,10 +91,10 @@ if __name__ == '__main__':
                 summary_level = "L6"
             abundances = {}
             num_tools = 0
+            i=0
             # ex. closed_ref
             for method in methods:
                 # ex. swarm
-                i=0
                 for tool in tools[method]:
                     print tool
                     num_tools+=1
