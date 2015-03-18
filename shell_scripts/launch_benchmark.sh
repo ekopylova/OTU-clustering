@@ -210,5 +210,5 @@ python $otu_clustering/python_scripts/run_beta_diversity_and_procrustes.py \
     $output_dir/program_results $gg_tree $silva_tree \
     $datasets/mapping_files "${env_studies_bac}" "${env_studies_euk}" \
     "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
-    $coordinate_matrices
+    "${coordinate_matrices}"
 
