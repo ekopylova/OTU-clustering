@@ -111,11 +111,11 @@ if __name__ == '__main__':
                                 total_abundance = sum(all_abundances)
                                 if not line[0] in abundances:
                                     abundances[line[0]] = {}
-                                        # new taxa not found previously by any tool,
-                                        # add to dictionary and set all abundances for
-                                        # other tools to 0.0
-                                        for j in range(0, i-3):
-                                            abundances[line[0]][j] = 0.0
+                                    # new taxa not found previously by any tool,
+                                    # add to dictionary and set all abundances for
+                                    # other tools to 0.0
+                                    for j in range(0, i-3):
+                                        abundances[line[0]][j] = 0.0
                                 abundances[line[0]][i-3] = total_abundance/float(num_samples)
                         # current tool is missing some taxa previously found
                         # by other tools, set abundance for this taxa to 0.0
