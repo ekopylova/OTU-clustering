@@ -51,10 +51,6 @@ if __name__ == '__main__':
         tools['open_ref'].append(tool)
     labels = []
 
-    num_tools = 0
-    for method in tools:
-        num_tools += len(tools[method])
-
     # studies 16S
     studies_bac_mock = sys.argv[6].split()
     studies_bac_env = sys.argv[7].split()
@@ -94,11 +90,13 @@ if __name__ == '__main__':
             else:
                 summary_level = "L6"
             abundances = {}
+            num_tools = 0
             # ex. closed_ref
             for method in methods:
                 # ex. swarm
                 i=0
                 for tool in tools[method]:
+                    num_tools+=1
                     tax_sum_fp = os.path.join(taxa_summary_dir, datatype, method, "%s_%s" % (tool, study), "otu_table_mc2_%s.txt" % summary_level)
                     if os.path.exists(tax_sum_fp):
                         with open(tax_sum_fp, 'U') as taxa_summary_f:
