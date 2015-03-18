@@ -145,6 +145,11 @@ if __name__ == '__main__':
 #                    sys.stdout.write("%s\t" % abundances[taxa][tool_abu])
 #                sys.stdout.write("\n")
 
+            if (study in studies_bac_mock or study in studies_euk_mock):
+                top_N_taxa = top_N_taxa_mock
+            else:
+                top_N_taxa = top_N_taxa_env
+
             # find the min abundance for storing top N taxa
             min_abundance = {}
             for i in range(0, num_tools):
@@ -211,9 +216,5 @@ if __name__ == '__main__':
             outdir = os.path.join(output_dir, datatype)
             if not os.path.exists(outdir):
                 os.makedirs(outdir)
-            if (study in studies_bac_mock or study in studies_euk_mock):
-                top_N_taxa = top_N_taxa_mock
-            else:
-                top_N_taxa = top_N_taxa_env
             plt.savefig(os.path.join(
                 outdir, "barchart_%s_top_%s_.png" % (study, top_N_taxa)), bbox_inches="tight", bbox_extra_artist=[lgd])
