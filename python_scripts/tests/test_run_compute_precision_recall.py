@@ -49,7 +49,7 @@ class ComputePrecisionRecall(TestCase):
         # to store output results of filter OTUs from table 
         self.filter_dir = join(self.results_dir, "filter_table")
         makedirs(self.filter_dir)
-        makedirs(join(self.filter_dir), "16S", "de_novo")
+        makedirs(join(self.filter_dir, "16S", "de_novo"))
         # to store precision / recall results
         self.precision_dir = join(self.results_dir, "precision")
         makedirs(self.precision_dir)
