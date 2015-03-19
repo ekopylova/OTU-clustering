@@ -1,9 +1,13 @@
 OTU-clustering
 ==============
 
-Scripts for benchmarking and comparison of short read OTU clustering tools available via QIIME 1.9.
-The full benchmark can be launched with the command `launch_benchmark.sh` in `OTU-clustering/shell_scripts/`.
-This script will execute all of the software tools & perform analysis using the datasets & scripts below. 
+Scripts for benchmarking and comparison of short read OTU clustering tools available via QIIME 1.9.0.
+The full benchmark can be launched with the script `OTU-clustering/shell_scripts/launch_benchmark.sh`.
+This script will execute all of the software tools and perform analysis using the datasets & scripts below.
+The user must modify the working directory path in `launch_benchmark.sh` prior to executing this script.
+Only commands for launching software in `OTU-clustering/shell_scripts/commands_16S.sh` and
+`OTU-clustering/shell_scripts/commands_18S.sh` are called using the qsub environment, although this is
+easily modifiable to run on any system.
 
 Dependencies
 ------------
@@ -44,7 +48,12 @@ The benchmarking and analysis comparison can be executed using the following scr
 The user must edit all of file and directory paths in each script to follow their own directory
 structure. 
 
-1.  Even and staggered community reads were simulated using:<br/>
+0. Launch full benchmark (executes all scripts below): <br/>
+OTU-clustering/shell_scripts/launch_benchmark.sh<br/><br/>
+
+Otherwise, the user may launch each script individually, <br/><br/>
+
+1.  Simulate even and staggered community reads:<br/>
 OTU-clustering/shell_scripts/simulate_reads.sh
 2.  Launch all software (via QIIME’s pick_closed_reference_otus.py, pick_de_novo_otus.py and pick_open_reference_otus.py) on 16S datasets:<br/>
 OTU-clustering/shell_scripts/commands_16S.sh
