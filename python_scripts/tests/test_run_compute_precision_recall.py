@@ -173,7 +173,7 @@ class ComputePrecisionRecall(TestCase):
 
         blast_db_command = ["makeblastdb",    
                             "-in", blast_nt_db_fp,
-                            "-out", os.path.join(self.results_dir, "nt"),
+                            "-out", join(self.results_dir, "nt"),
                             "-dbtype", "nucl",
                             "-parse_seqids"]
 
@@ -190,7 +190,7 @@ class ComputePrecisionRecall(TestCase):
             self.filter_dir,
             taxonomy_mean,
             taxonomy_stdev,
-            os.path.join(self.results_dir, "nt"),
+            join(self.results_dir, "nt"),
             actual_tax,
             expected_tax,
             "swarm",
