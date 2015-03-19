@@ -53,7 +53,7 @@ blast_nt=/scratch/Users/evko1434/reference/blast_databases/nt
 
 # number of threads to use (all of the $otu_clustering/param_files/* files should
 # also have threads set to use this number)
-num_threads=10
+num_threads=20
 
 # number of jobs to launch
 num_jobs=1
@@ -191,7 +191,7 @@ python $otu_clustering/python_scripts/run_compute_precision_recall.py \
     $output_dir/run_summarize_tables $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
     $blast_nt "${simulated_studies_bac} ${mock_studies_bac}" "${mock_studies_euk}" \
     "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
-    $datasets/expected_taxonomies
+    $datasets/expected_taxonomies $num_threads
 
 # generate alpha diversity plots (if additional studies are added to the
 # benchmark, their sampling depths should be also added to the
