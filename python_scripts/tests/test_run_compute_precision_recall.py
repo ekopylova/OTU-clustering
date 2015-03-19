@@ -147,63 +147,63 @@ class ComputePrecisionRecall(TestCase):
         self.assertEqual(taxonomy_stdev_expected, taxonomy_stdev)
 
 
-def test_compute_fp_other(self):
-    """ Test compute_fp_other function
-    """
+    def test_compute_fp_other(self):
+        """ Test compute_fp_other function
+        """
 
-    expected_tax = set(['k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Ruminococcaceae;g__Ruminococcus',
-                        'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae;g__Providencia',
-                        'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Lachnospiraceae;g__Dorea'])
+        expected_tax = set(['k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Ruminococcaceae;g__Ruminococcus',
+                            'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae;g__Providencia',
+                            'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Lachnospiraceae;g__Dorea'])
 
-    actual_tax = set(['k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Ruminococcaceae;g__Ruminococcus',
-                      'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae;g__Providencia',
-                      'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Lachnospiraceae;g__Dorea',
-                      'k__Bacteria;p__Firmicutes;c__Bacilli',
-                      'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria',
-                      'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Pseudomonadales;f__Moraxellaceae;g__Acinetobacter',
-                      'k__Bacteria;p__Lentisphaerae;c__[Lentisphaeria];o__Victivallales;f__Victivallaceae;g__Victivallis',
-                      'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales'])
+        actual_tax = set(['k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Ruminococcaceae;g__Ruminococcus',
+                          'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacteriales;f__Enterobacteriaceae;g__Providencia',
+                          'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Lachnospiraceae;g__Dorea',
+                          'k__Bacteria;p__Firmicutes;c__Bacilli',
+                          'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria',
+                          'k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Pseudomonadales;f__Moraxellaceae;g__Acinetobacter',
+                          'k__Bacteria;p__Lentisphaerae;c__[Lentisphaeria];o__Victivallales;f__Victivallaceae;g__Victivallis',
+                          'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales'])
 
-    chimera_db_16S_fp = StringIO(chimera_db_16S)
-    taxonomy_mean = {}
-    taxonomy_stdev = {}
+        chimera_db_16S_fp = StringIO(chimera_db_16S)
+        taxonomy_mean = {}
+        taxonomy_stdev = {}
 
-    # build blast index
-    blast_nt_db_fp = StringIO(blast_nt_db)
+        # build blast index
+        blast_nt_db_fp = StringIO(blast_nt_db)
 
-    blast_db_command = ["makeblastdb",    
-                        "-in", blast_nt_db_fp,
-                        "-out", os.path.join(self.results_dir, "nt"),
-                        "-dbtype", "nucl",
-                        "-parse_seqids"]
+        blast_db_command = ["makeblastdb",    
+                            "-in", blast_nt_db_fp,
+                            "-out", os.path.join(self.results_dir, "nt"),
+                            "-dbtype", "nucl",
+                            "-parse_seqids"]
 
-    proc = Popen(blast_db_command,
-                 stdout=PIPE,
-                 stderr=PIPE,
-                 close_fds=True)
-    proc.wait()
-    stdout, stderr = proc.communicate()
+        proc = Popen(blast_db_command,
+                     stdout=PIPE,
+                     stderr=PIPE,
+                     close_fds=True)
+        proc.wait()
+        stdout, stderr = proc.communicate()
 
 
-    fp_chimera, fp_known, fp_other = compute_fp_other(self.results_dir,
-        self.precision_dir,
-        self.filter_dir,
-        taxonomy_mean,
-        taxonomy_stdev,
-        os.path.join(self.results_dir, "nt"),
-        actual_tax,
-        expected_tax,
-        "swarm",
-        "test",
-        "16S",
-        "de_novo",
-        "L6",
-        chimera_db_16S_fp,
-        "1")
+        fp_chimera, fp_known, fp_other = compute_fp_other(self.results_dir,
+            self.precision_dir,
+            self.filter_dir,
+            taxonomy_mean,
+            taxonomy_stdev,
+            os.path.join(self.results_dir, "nt"),
+            actual_tax,
+            expected_tax,
+            "swarm",
+            "test",
+            "16S",
+            "de_novo",
+            "L6",
+            chimera_db_16S_fp,
+            "1")
 
-    print "fp_chimera = ", fp_chimera
-    print "fp_known = ", fp_known
-    print "fp_other = ", fp_other
+        print "fp_chimera = ", fp_chimera
+        print "fp_known = ", fp_known
+        print "fp_other = ", fp_other
 
 
 seqs = """>MockMiSeq.even.673461_41582 M00181:51:000000000-A0LUP:1:2:14492:25221 1:N:0:0 orig_bc=ATCTGCCTGGAA new_bc=ATCTGCCTGGAA bc_diffs=0
