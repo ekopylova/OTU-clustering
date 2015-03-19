@@ -220,3 +220,4 @@ if __name__ == '__main__':
                 os.makedirs(outdir)
             plt.savefig(os.path.join(
                 outdir, "barchart_%s_top_%s.png" % (study, top_N_taxa)), bbox_inches="tight", bbox_extra_artist=[lgd])
+            plt.clf()
