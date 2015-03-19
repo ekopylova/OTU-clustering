@@ -191,7 +191,22 @@ class ComputePrecisionRecall(TestCase):
         proc.wait()
         stdout, stderr = proc.communicate()
 
+        # filter singletons from OTU table
+        filter_otus_from_otu_table_command = ["filter_otus_from_otu_table.py",
+                                            "-i",
+                                            os.path.join(self.results_dir, "otu_table.biom"),
+                                            "-o",
+                                            os.path.join(self.filter_dir, "otu_table_mc2.biom"),
+                                            "--min_count",
+                                            "2"]
+        proc = Popen(filter_otus_from_otu_table_command,
+                   stdout=PIPE,
+                   stderr=PIPE,
+                   close_fds=True)
+        proc.wait()
+        stdout, stderr = proc.communicate()
 
+        # compute FP-chimera, FP-known and FP-other count
         fp_chimera, fp_known, fp_other = compute_fp_other(self.results_dir,
             self.precision_dir,
             self.filter_dir,
