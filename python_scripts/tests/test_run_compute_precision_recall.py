@@ -173,7 +173,7 @@ def test_compute_fp_other(self):
 
     blast_db_command = ["makeblastdb",    
                         "-in", blast_nt_db_fp,
-                        "-out", os.path.join(self.results_dir, "nt")
+                        "-out", os.path.join(self.results_dir, "nt"),
                         "-dbtype", "nucl",
                         "-parse_seqids"]
 
