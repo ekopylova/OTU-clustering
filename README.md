@@ -3,7 +3,7 @@ OTU-clustering
 
 Scripts for benchmarking and comparison of short read OTU clustering tools available via QIIME 1.9.0.
 The full benchmark can be launched with the script `OTU-clustering/shell_scripts/launch_benchmark.sh`.
-This script will execute all of the software tools and perform analysis using the datasets & scripts below.
+This script will execute all software tools and perform analysis using the datasets & scripts below.
 The user must modify the working directory path in `launch_benchmark.sh` prior to executing this script.
 Only commands for launching software in `OTU-clustering/shell_scripts/commands_16S.sh` and
 `OTU-clustering/shell_scripts/commands_18S.sh` are called using the qsub environment, although this is
@@ -49,34 +49,34 @@ The user must edit all of file and directory paths in each script to follow thei
 structure. 
 
 0. Launch full benchmark (executes all scripts below): <br/>
-OTU-clustering/shell_scripts/launch_benchmark.sh<br/><br/>
+`OTU-clustering/shell_scripts/launch_benchmark.sh`<br/><br/>
 
 Otherwise, the user may launch each script individually, <br/><br/>
 
 1.  Simulate even and staggered community reads:<br/>
-OTU-clustering/shell_scripts/simulate_reads.sh
+`OTU-clustering/shell_scripts/simulate_reads.sh`
 2.  Launch all software (via QIIME’s pick_closed_reference_otus.py, pick_de_novo_otus.py and pick_open_reference_otus.py) on 16S datasets:<br/>
-OTU-clustering/shell_scripts/commands_16S.sh
+`OTU-clustering/shell_scripts/commands_16S.sh`
 3.  Launch all software on 18S datasets:<br/>
-OTU-clustering/shell_scripts/commands_18S.sh
+`OTU-clustering/shell_scripts/commands_18S.sh`
 4.  Remove singleton OTUs (OTUs consisting of only 1 read) from the final OTU tables generated in steps 2 and 3:<br/>
-OTU-clustering/python_scripts/run_filter_singleton_otus.py
+`OTU-clustering/python_scripts/run_filter_singleton_otus.py`
 5.  Summarize taxonomy using filtered OTU tables:<br/>
-OTU-clustering/python_scripts/run_summarize_taxa.py
+`OTU-clustering/python_scripts/run_summarize_taxa.py`
 6.  Summarize filtered OTU tables:<br/>
-OTU-clustering/python_scripts/run_summarize_tables.py
+`OTU-clustering/python_scripts/run_summarize_tables.py`
 7.  Compute true positive, false positive, false negative, precision, recall, F-measure and FP-chimera, FP-known, FP-other metrics using the summarized taxonomy results:<br/>
-OTU-clustering/python_scripts/run_compute_precision_recall.py
+`OTU-clustering/python_scripts/run_compute_precision_recall.py`
 8.  Generate alpha diversity plots:<br/>
-OTU-clustering/python_scripts/run_single_rarefaction_and_plot.py
+`OTU-clustering/python_scripts/run_single_rarefaction_and_plot.py`
 9.  Generate beta diversity plots:<br/>
-OTU-clustering/python_scripts/run_beta_diversity_and_procrustes.py
+`OTU-clustering/python_scripts/run_beta_diversity_and_procrustes.py`
 10. Generate taxonomy comparison tables:<br/>
-OTU-clustering/python_scripts/run_compare_taxa_summaries.py
+`OTU-clustering/python_scripts/run_compare_taxa_summaries.py`
 11. Generate taxonomy stacked bar plots:<br/>
-OTU-clustering/python_scripts/run_generate_taxa_barcharts.py
+`OTU-clustering/python_scripts/run_generate_taxa_barcharts.py`
 12. Plot TP, FP-chimera, FP-known and FP-other results:<br/>
-OTU-clustering/python_scripts/plot_tp_fp_distribution.py
+`OTU-clustering/python_scripts/plot_tp_fp_distribution.py`
 
 Citing
 ------
