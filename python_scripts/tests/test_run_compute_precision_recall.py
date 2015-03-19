@@ -47,8 +47,9 @@ class ComputePrecisionRecall(TestCase):
         self.output_dir = join(self.results_dir, "16S", "de_novo")
         makedirs(self.output_dir)
         # to store output results of filter OTUs from table 
-        self.filter_dir = join(self.results_dir, "filter_table", "16S", "de_novo")
+        self.filter_dir = join(self.results_dir, "filter_table")
         makedirs(self.filter_dir)
+        makedirs(join(self.filter_dir), "16S", "de_novo")
         # to store precision / recall results
         self.precision_dir = join(self.results_dir, "precision")
         makedirs(self.precision_dir)
@@ -190,21 +191,25 @@ class ComputePrecisionRecall(TestCase):
                      close_fds=True)
         proc.wait()
         stdout, stderr = proc.communicate()
+        if stderr:
+            print stderr
 
         # filter singletons from OTU table
         filter_otus_from_otu_table_command = ["filter_otus_from_otu_table.py",
-                                            "-i",
-                                            join(self.results_dir, "otu_table.biom"),
-                                            "-o",
-                                            join(self.filter_dir, "otu_table_mc2.biom"),
-                                            "--min_count",
-                                            "2"]
+                                              "-i",
+                                              join(self.results_dir, "otu_table.biom"),
+                                              "-o",
+                                              join(self.filter_dir, "otu_table_mc2.biom"),
+                                              "--min_count",
+                                              "2"]
         proc = Popen(filter_otus_from_otu_table_command,
-                   stdout=PIPE,
-                   stderr=PIPE,
-                   close_fds=True)
+                     stdout=PIPE,
+                     stderr=PIPE,
+                     close_fds=True)
         proc.wait()
         stdout, stderr = proc.communicate()
+        if stderr:
+            print stderr
 
         # compute FP-chimera, FP-known and FP-other count
         fp_chimera, fp_known, fp_other = compute_fp_other(self.results_dir,
