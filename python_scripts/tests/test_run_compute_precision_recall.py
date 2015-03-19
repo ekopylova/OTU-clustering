@@ -197,9 +197,9 @@ class ComputePrecisionRecall(TestCase):
         # filter singletons from OTU table
         filter_otus_from_otu_table_command = ["filter_otus_from_otu_table.py",
                                               "-i",
-                                              join(self.results_dir, "otu_table.biom"),
+                                              join(self.output_dir, "swarm_test", "otu_table.biom"),
                                               "-o",
-                                              join(self.filter_dir, "otu_table_mc2.biom"),
+                                              join(self.filter_dir, "16S", "de_novo", "swarm_test", "otu_table_mc2.biom"),
                                               "--min_count",
                                               "2"]
         proc = Popen(filter_otus_from_otu_table_command,
