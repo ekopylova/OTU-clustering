@@ -73,6 +73,15 @@ class ComputePrecisionRecall(TestCase):
         with open(self.params, 'w') as tmp:
             tmp.write(params)
 
+        # blast database
+        f, self.blast_nt_db = mkstemp(prefix='blast_nt_',
+                                      suffix='.fasta')
+        close(f)
+
+        # write read sequences to tmp file
+        with open(self.blast_nt_db, 'w') as tmp:
+            tmp.write(blast_nt_db)
+
         # run pick_de_novo_otus.py using swarm
         pick_de_novo_otus_command = ["pick_de_novo_otus.py",    
                                      "-i", self.seqs,
@@ -169,10 +178,8 @@ class ComputePrecisionRecall(TestCase):
         taxonomy_stdev = {}
 
         # build blast index
-        blast_nt_db_fp = StringIO(blast_nt_db)
-
         blast_db_command = ["makeblastdb",    
-                            "-in", blast_nt_db_fp,
+                            "-in", self.blast_nt_db,
                             "-out", join(self.results_dir, "nt"),
                             "-dbtype", "nucl",
                             "-parse_seqids"]
