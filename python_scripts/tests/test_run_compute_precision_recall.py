@@ -42,19 +42,19 @@ class ComputePrecisionRecall(TestCase):
             config should be set to Greengenes 97% OTUs (version 13.8)
             for the taxonomy to be assigned as expected.
         """
-        self.results_dir = mkdtemp()
+        self.root_dir = mkdtemp()
         # to store program results
-        self.output_dir = join(self.results_dir, "16S", "de_novo")
-        makedirs(self.output_dir)
+        self.results_dir = join(self.root_dir, "16S", "de_novo")
+        makedirs(self.results_dir)
         # to store output results of filter OTUs from table 
-        self.filter_dir = join(self.results_dir, "filter_table")
+        self.filter_dir = join(self.root_dir, "filter_table")
         makedirs(self.filter_dir)
         makedirs(join(self.filter_dir, "16S", "de_novo"))
         # to store precision / recall results
-        self.precision_dir = join(self.results_dir, "precision")
+        self.precision_dir = join(self.root_dir, "precision")
         makedirs(self.precision_dir)
 
-        print "self.results_dir = ", self.results_dir
+        print "self.root_dir = ", self.root_dir
 
         # create temporary file with read sequences defined in seqs
         f, self.seqs = mkstemp(prefix='temp_reads_',
@@ -87,7 +87,7 @@ class ComputePrecisionRecall(TestCase):
         pick_de_novo_otus_command = ["pick_de_novo_otus.py",    
                                      "-i", self.seqs,
                                      "-p", self.params,
-                                     "-o", join(self.output_dir, "swarm_test")]
+                                     "-o", join(self.results_dir, "swarm_test")]
 
         proc = Popen(pick_de_novo_otus_command,
                      stdout=PIPE,
@@ -97,9 +97,9 @@ class ComputePrecisionRecall(TestCase):
         stdout, stderr = proc.communicate()
 
         results_otus = join(
-            self.output_dir, "swarm_test", "swarm_picked_otus", "%s_otus.txt" % splitext(basename(self.seqs))[0])
+            self.results_dir, "swarm_test", "swarm_picked_otus", "%s_otus.txt" % splitext(basename(self.seqs))[0])
         rename_otus = join(
-            self.output_dir, "swarm_test", "swarm_picked_otus", "seqs_otus.txt")
+            self.results_dir, "swarm_test", "swarm_picked_otus", "seqs_otus.txt")
 
         rename(results_otus, rename_otus)
 
@@ -108,7 +108,7 @@ class ComputePrecisionRecall(TestCase):
 
     def tearDown(self):
     	#remove_files(self.files_to_remove)
-        #rmtree(self.results_dir)
+        #rmtree(self.root_dir)
         pass
 
     def test_graph_abundance_func(self):
@@ -146,7 +146,7 @@ class ComputePrecisionRecall(TestCase):
                              "swarm",
                              "test",
                              "de_novo",
-                             self.results_dir,
+                             self.root_dir,
                              taxonomy_mean,
                              taxonomy_stdev)
 
@@ -181,7 +181,7 @@ class ComputePrecisionRecall(TestCase):
         # build blast index
         blast_db_command = ["makeblastdb",    
                             "-in", self.blast_nt_db,
-                            "-out", join(self.results_dir, "nt"),
+                            "-out", join(self.root_dir, "nt"),
                             "-dbtype", "nucl",
                             "-parse_seqids"]
 
@@ -194,10 +194,12 @@ class ComputePrecisionRecall(TestCase):
         if stderr:
             print stderr
 
+        self.assertTrue(exists(join(self.results_dir, "swarm_test", "otu_table.biom")))
+
         # filter singletons from OTU table
         filter_otus_from_otu_table_command = ["filter_otus_from_otu_table.py",
                                               "-i",
-                                              join(self.output_dir, "swarm_test", "otu_table.biom"),
+                                              join(self.results_dir, "swarm_test", "otu_table.biom"),
                                               "-o",
                                               join(self.filter_dir, "16S", "de_novo", "swarm_test", "otu_table_mc2.biom"),
                                               "--min_count",
@@ -211,13 +213,15 @@ class ComputePrecisionRecall(TestCase):
         if stderr:
             print stderr
 
+        self.assertTrue(exists(join(self.filter_dir, "16S", "de_novo", "swarm_test", "otu_table_mc2.biom")))
+
         # compute FP-chimera, FP-known and FP-other count
-        fp_chimera, fp_known, fp_other = compute_fp_other(self.results_dir,
+        fp_chimera, fp_known, fp_other = compute_fp_other(self.root_dir,
             self.precision_dir,
             self.filter_dir,
             taxonomy_mean,
             taxonomy_stdev,
-            join(self.results_dir, "nt"),
+            join(self.root_dir, "nt"),
             actual_tax,
             expected_tax,
             "swarm",
@@ -689,8 +693,6 @@ TGACCCAACTGTAAGCGGATGCTGCCGAAGGTGGGACCGATATCTGGGAAGGAGTCGTAACAAGGTAGCC
 GT
 """
 
-chimera_db_18S = """
-"""
 
 if __name__ == '__main__':
     main()
