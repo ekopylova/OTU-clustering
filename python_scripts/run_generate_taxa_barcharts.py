@@ -49,7 +49,6 @@ if __name__ == '__main__':
     for tool in tools_open_ref:
       if tool not in tools['open_ref']:
         tools['open_ref'].append(tool)
-    labels = []
 
     # studies 16S
     studies_bac_mock = sys.argv[6].split()
@@ -78,8 +77,8 @@ if __name__ == '__main__':
     # OTU picking methods
     methods = ['de_novo', 'closed_ref', 'open_ref']
 
-    top_N_taxa_mock = sys.argv[10]
-    top_N_taxa_env = sys.argv[11]
+    top_N_taxa_mock = int(sys.argv[10])
+    top_N_taxa_env = int(sys.argv[11])
 
     # ex. 16S
     for datatype in datatypes:
@@ -92,14 +91,14 @@ if __name__ == '__main__':
             abundances = {}
             num_tools = 0
             i=0
+            labels = []
             # ex. closed_ref
             for method in methods:
                 # ex. swarm
                 for tool in tools[method]:
-                    print tool
-                    num_tools+=1
                     tax_sum_fp = os.path.join(taxa_summary_dir, datatype, method, "%s_%s" % (tool, study), "otu_table_mc2_%s.txt" % summary_level)
                     if os.path.exists(tax_sum_fp):
+                        num_tools+=1
                         with open(tax_sum_fp, 'U') as taxa_summary_f:
                             for line in taxa_summary_f:
                                 if line.startswith("#"):
@@ -123,7 +122,7 @@ if __name__ == '__main__':
                             if i not in abundances[taxa]:
                                 abundances[taxa][i] = 0.0
 
-                        i=+1
+                        i+=1
                     else:
                         print "skipping %s does not exist" % tax_sum_fp
                         continue
@@ -138,11 +137,15 @@ if __name__ == '__main__':
                         tool1 = tool
                     labels.append(tool1)
 
-            for taxa in abundances:
-                sys.stdout.write("%s\t" % taxa)
-                for tool_abu in abundances[taxa]:
-                    sys.stdout.write("%s\t" % abundances[taxa][tool_abu])
-                sys.stdout.write("\n")
+            # go to next study
+            if num_tools == 0:
+                continue
+
+#            for taxa in abundances:
+#                sys.stdout.write("%s\t" % taxa)
+#                for tool_abu in abundances[taxa]:
+#                    sys.stdout.write("%s\t" % abundances[taxa][tool_abu])
+#                sys.stdout.write("\n")
 
             if (study in studies_bac_mock or study in studies_euk_mock):
                 top_N_taxa = top_N_taxa_mock
@@ -216,4 +219,4 @@ if __name__ == '__main__':
             if not os.path.exists(outdir):
                 os.makedirs(outdir)
             plt.savefig(os.path.join(
-                outdir, "barchart_%s_top_%s_.png" % (study, top_N_taxa)), bbox_inches="tight", bbox_extra_artist=[lgd])
+                outdir, "barchart_%s_top_%s.png" % (study, top_N_taxa)), bbox_inches="tight", bbox_extra_artist=[lgd])
