@@ -184,14 +184,14 @@ python $otu_clustering/python_scripts/run_summarize_tables.py \
 # compute true positive, false positive, false negative, precision, recall,
 # F-measure and FP-chimera, FP-known, FP-other metrics using the summarized
 # taxonomy results
-#echo "Step 4: compute TP, FP, FN, precision, recall & other metrics using the summarized taxonomies"
-#mkdir $output_dir/run_compute_precision_recall
-#python $otu_clustering/python_scripts/run_compute_precision_recall.py \
-#    $output_dir/program_results $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
-#    $output_dir/run_summarize_tables $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
-#    $blast_nt "${simulated_studies_bac} ${mock_studies_bac}" "${mock_studies_euk}" \
-#    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
-#    $datasets/expected_taxonomies
+echo "Step 4: compute TP, FP, FN, precision, recall & other metrics using the summarized taxonomies"
+mkdir $output_dir/run_compute_precision_recall
+python $otu_clustering/python_scripts/run_compute_precision_recall.py \
+    $output_dir/program_results $output_dir/run_filter_singleton_otus $output_dir/run_summarize_taxa \
+    $output_dir/run_summarize_tables $output_dir/run_compute_precision_recall $silva_reference $gold_fp \
+    $blast_nt "${simulated_studies_bac} ${mock_studies_bac}" "${mock_studies_euk}" \
+    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
+    $datasets/expected_taxonomies
 
 # generate alpha diversity plots (if additional studies are added to the
 # benchmark, their sampling depths should be also added to the
@@ -234,4 +234,12 @@ python $otu_clustering/python_scripts/run_generate_taxa_barcharts.py \
     "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}" \
     "${mock_studies_bac}" "${env_studies_bac}" "${mock_studies_euk}" "${env_studies_euk}" \
     $top_N_taxa_mock $top_N_taxa_env
+
+# Plot TP, FP-chimera, FP-known and FP-other results
+echo "Step 9: Plot TP, FP-chimera, FP-known and FP-other results"
+mkdir $output_dir/plot_tp_fp_distribution
+python $otu_clustering/python_scripts/plot_tp_fp_distribution.py \
+    $output_dir/run_compute_precision_recall \
+    $output_dir/plot_tp_fp_distribution "${mock_studies_bac}" "${mock_studies_euk}" \
+    "${tools_denovo}" "${tools_closed_ref}" "${tools_open_ref}"
 
