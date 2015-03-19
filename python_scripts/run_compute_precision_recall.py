@@ -132,15 +132,10 @@ def graph_abundance_func(true_positive_otus,
     taxonomy_mean[tool].append(np.rint(np.nan_to_num(np.mean(arr, axis=0))))
     taxonomy_stdev[tool].append(np.rint(np.nan_to_num(np.std(arr, axis=0))))
 
-    #print "taxonomy_mean = ", taxonomy_mean
-    #print "taxonomy_stdev = ", taxonomy_stdev
-
 
 def compute_fp_other(results_dir,
                      out_dir,
                      filter_otus_dir,
-                     chimera_db_18S,
-                     chimera_db_16S,
                      taxonomy_mean,
                      taxonomy_stdev,
                      blast_nt_index,
@@ -150,7 +145,10 @@ def compute_fp_other(results_dir,
                      study,
                      datatype,
                      method,
-                     tax_level):
+                     tax_level,
+                     chimera_db_18S=None,
+                     chimera_db_16S=None,
+                     threads="1"):
     '''This function completes the following steps,
          1. Load original OTU table (excl. singleton OTUs) into dict with taxonomies as
             keys and OTUs representing them as values in a list (only L5 and L6 supported)
@@ -173,6 +171,11 @@ def compute_fp_other(results_dir,
             to graph_abundance_func() to compute the mean number of reads representing each
             taxa in each of those dicts.
     '''
+
+    if datatype == "16S" and chimera_db_16S is None:
+        raise ValueError("A chimera database for 16S must be passed")
+    elif datatype == "18S" and chimera_db_18S is None:
+        raise ValueError("A chimera database for 18S must be passed")
 
     fp_chimera = 0
     fp_known = 0
@@ -360,7 +363,7 @@ def compute_fp_other(results_dir,
                      "-evalue", "1e-5",
                      "-outfmt", "6 std qcovs",
                      "-max_target_seqs", "1",
-                     "-num_threads", "50"]
+                     "-num_threads", threads]
     #print "command = ", blast_command
     proc = Popen(blast_command, stdout=PIPE, stderr=PIPE, close_fds=True)
     proc.wait()
@@ -505,6 +508,9 @@ def main(argv):
     # filepath to expected summarized taxonomies
     expected_fp = sys.argv[14]
 
+    # number threads for Blast search
+    threads = sys.argv[15]
+
     # OTU-picking methods
     methods = ['de_novo', 'closed_ref', 'open_ref']
 
@@ -599,9 +605,9 @@ def main(argv):
 
                     if ((study != "even") and (study != "staggered")):
                         fp_chimera, fp_known, fp_other = compute_fp_other(results_dir, out_dir,
-                            filter_otus_dir, chimera_db_18S, chimera_db_16S, taxonomy_mean, taxonomy_stdev,
+                            filter_otus_dir, taxonomy_mean, taxonomy_stdev,
                             blast_nt_index, actual_tax, expected_tax, tool, study, datatype,
-                            method, tax_level)
+                            method, tax_level, chimera_db_18S, chimera_db_16S, threads)
 
                     tp = len(actual_tax & expected_tax)
                     fp = len(actual_tax - expected_tax)
