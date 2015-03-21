@@ -45,8 +45,7 @@ Scripts
 -------
 
 The benchmarking and analysis comparison can be executed using the following scripts (in given order).
-The user must edit all of file and directory paths in each script to follow their own directory
-structure. 
+Scripts 1-12 require input arguments, all of which are defined in `launch_benchmark.sh`.
 
 0. Launch full benchmark (executes all scripts below): <br/>
 `OTU-clustering/shell_scripts/launch_benchmark.sh`<br/><br/>
