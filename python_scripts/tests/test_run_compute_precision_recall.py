@@ -49,8 +49,6 @@ class ComputePrecisionRecall(TestCase):
         # precision / recall results
         makedirs(join(self.root_dir, "precision", "16S", "de_novo"))
 
-        print "self.root_dir = ", self.root_dir
-
         # create temporary OTU map
         f, self.otu_map = mkstemp(prefix='seqs_otus_',
                                   suffix='.txt')
@@ -108,8 +106,7 @@ class ComputePrecisionRecall(TestCase):
 
     def tearDown(self):
         remove_files(self.files_to_remove)
-        #rmtree(self.root_dir)
-        pass
+        rmtree(self.root_dir)
 
     def test_graph_abundance_func(self):
         """ Verify the correctness of graph_abundance_func() functionality
@@ -177,8 +174,6 @@ class ComputePrecisionRecall(TestCase):
         taxonomy_mean = {}
         taxonomy_stdev = {}
 
-        print "self.root_dir = ", self.root_dir
-
         # build blast index
         blast_db_command = ["makeblastdb",    
                             "-in", self.blast_nt_db,
@@ -213,9 +208,14 @@ class ComputePrecisionRecall(TestCase):
             chimera_db_16S=self.chimera_db_16S,
             threads="1")
 
-        print "fp_chimera = ", fp_chimera
-        print "fp_known = ", fp_known
-        print "fp_other = ", fp_other
+        # 2 false-positive taxonomies comprised fully of chimeric reads
+        self.assertEqual(fp_chimera, 2)
+        # 2 false-positive taxonomies matching with >=97% id and coverage
+        # to Blast NT's database
+        self.assertEqual(fp_known, 2)
+        # 1 false-positive taxonomy matching with <97% id and coverage to
+        # Blast NT's database
+        self.assertEqual(fp_other, 1)
 
 
 seqs = """>MockMiSeq.even.673461_41582 M00181:51:000000000-A0LUP:1:2:14492:25221 1:N:0:0 orig_bc=ATCTGCCTGGAA new_bc=ATCTGCCTGGAA bc_diffs=0
