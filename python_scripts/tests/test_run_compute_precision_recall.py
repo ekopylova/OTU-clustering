@@ -4,6 +4,13 @@ Unit tests for run_compute_precision_recall.py
 ==============================================
 """
 
+# ----------------------------------------------------------------------------
+# Copyright (c) 2015--, Evguenia Kopylova
+#
+# Distributed under the terms of the Modified BSD License.
+#
+# The full license is in the file COPYING.txt, distributed with this software.
+# ----------------------------------------------------------------------------
 
 from unittest import TestCase, main
 import re
@@ -12,7 +19,7 @@ from os import close, walk, remove, environ, rename, makedirs
 from os.path import (abspath, exists, getsize, join,
                      dirname, splitext, basename)
 from tempfile import mkstemp, mkdtemp
-from shutil import rmtree
+from shutil import rmtree, move
 from StringIO import StringIO
 
 from skbio.parse.sequences import parse_fasta
@@ -20,14 +27,6 @@ from skbio.util import remove_files
 
 from run_compute_precision_recall import (graph_abundance_func,
                                           compute_fp_other)
-
-# ----------------------------------------------------------------------------
-# Copyright (c) 2015--, Evguenia Kopylova
-#
-# Distributed under the terms of the Modified BSD License.
-#
-# The full license is in the file COPYING.txt, distributed with this software.
-# ----------------------------------------------------------------------------
 
 
 # Test class and cases
@@ -43,36 +42,47 @@ class ComputePrecisionRecall(TestCase):
             for the taxonomy to be assigned as expected.
         """
         self.root_dir = mkdtemp()
-        # to store program results
-        self.results_dir = join(self.root_dir, "16S", "de_novo")
-        makedirs(self.results_dir)
-        # to store output results of filter OTUs from table 
-        self.filter_dir = join(self.root_dir, "filter_table")
-        makedirs(self.filter_dir)
-        makedirs(join(self.filter_dir, "16S", "de_novo"))
-        # to store precision / recall results
-        self.precision_dir = join(self.root_dir, "precision")
-        makedirs(self.precision_dir)
+        # OTU map and BIOM table
+        makedirs(join(self.root_dir, "program_results", "16S", "de_novo", "swarm_test", "swarm_picked_otus"))
+        # representative set
+        makedirs(join(self.root_dir, "program_results", "16S", "de_novo", "swarm_test", "rep_set"))
+        # precision / recall results
+        makedirs(join(self.root_dir, "precision", "16S", "de_novo"))
 
         print "self.root_dir = ", self.root_dir
 
-        # create temporary file with read sequences defined in seqs
-        f, self.seqs = mkstemp(prefix='temp_reads_',
-                               suffix='.fasta')
+        # create temporary OTU map
+        f, self.otu_map = mkstemp(prefix='seqs_otus_',
+                                  suffix='.txt')
         close(f)
 
         # write read sequences to tmp file
-        with open(self.seqs, 'w') as tmp:
-            tmp.write(seqs)
+        with open(self.otu_map, 'w') as tmp:
+            tmp.write(otu_map)
 
-        # create temporary params file
-        f, self.params = mkstemp(prefix='temp_params_',
-                                 suffix='.txt')
+        move(self.otu_map, join(self.root_dir, "program_results", "16S", "de_novo", "swarm_test", "swarm_picked_otus", "seqs_otus.txt"))
+
+        # create temporary BIOM table without singletons
+        f, self.biom_table_mc2 = mkstemp(prefix='otu_table_mc2_',
+                                         suffix='.biom')
         close(f)
 
-        # write read sequences to tmp file
-        with open(self.params, 'w') as tmp:
-            tmp.write(params)
+        # write BIOM table to temporary file
+        with open(self.biom_table_mc2, 'w') as tmp:
+            tmp.write(biom_table_mc2)
+
+        move(self.biom_table_mc2, join(self.root_dir, "program_results", "16S", "de_novo", "swarm_test", "otu_table_mc2.biom"))
+
+        # create temporary representative set
+        f, self.rep_set = mkstemp(prefix='rep_set_',
+                                  suffix='.biom')
+        close(f)
+
+        # write representative set to temporary file
+        with open(self.rep_set, 'w') as tmp:
+            tmp.write(rep_set)
+
+        move(self.rep_set, join(self.root_dir, "program_results", "16S", "de_novo", "swarm_test", "rep_set", "seqs_rep_set.fasta"))
 
         # blast database
         f, self.blast_nt_db = mkstemp(prefix='blast_nt_',
@@ -83,31 +93,21 @@ class ComputePrecisionRecall(TestCase):
         with open(self.blast_nt_db, 'w') as tmp:
             tmp.write(blast_nt_db)
 
-        # run pick_de_novo_otus.py using swarm
-        pick_de_novo_otus_command = ["pick_de_novo_otus.py",    
-                                     "-i", self.seqs,
-                                     "-p", self.params,
-                                     "-o", join(self.results_dir, "swarm_test")]
+        # chimera 16S database
+        f, self.chimera_db_16S = mkstemp(prefix='chimera_16S_db',
+                                         suffix='.fasta')
+        close(f)
 
-        proc = Popen(pick_de_novo_otus_command,
-                     stdout=PIPE,
-                     stderr=PIPE,
-                     close_fds=True)
-        proc.wait()
-        stdout, stderr = proc.communicate()
-
-        results_otus = join(
-            self.results_dir, "swarm_test", "swarm_picked_otus", "%s_otus.txt" % splitext(basename(self.seqs))[0])
-        rename_otus = join(
-            self.results_dir, "swarm_test", "swarm_picked_otus", "seqs_otus.txt")
-
-        rename(results_otus, rename_otus)
+        # write sequences to tmp file
+        with open(self.chimera_db_16S, 'w') as tmp:
+            tmp.write(chimera_db_16S)
 
         # list of files to remove
-        self.files_to_remove = [self.seqs, self.params]
+        self.files_to_remove = [self.chimera_db_16S,
+                                self.blast_nt_db]
 
     def tearDown(self):
-    	#remove_files(self.files_to_remove)
+    	remove_files(self.files_to_remove)
         #rmtree(self.root_dir)
         pass
 
@@ -146,7 +146,7 @@ class ComputePrecisionRecall(TestCase):
                              "swarm",
                              "test",
                              "de_novo",
-                             self.root_dir,
+                             join(self.root_dir, "program_results"),
                              taxonomy_mean,
                              taxonomy_stdev)
 
@@ -174,9 +174,10 @@ class ComputePrecisionRecall(TestCase):
                           'k__Bacteria;p__Lentisphaerae;c__[Lentisphaeria];o__Victivallales;f__Victivallaceae;g__Victivallis',
                           'k__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales'])
 
-        chimera_db_16S_fp = StringIO(chimera_db_16S)
         taxonomy_mean = {}
         taxonomy_stdev = {}
+
+        print "self.root_dir = ", self.root_dir
 
         # build blast index
         blast_db_command = ["makeblastdb",    
@@ -194,31 +195,11 @@ class ComputePrecisionRecall(TestCase):
         if stderr:
             print stderr
 
-        self.assertTrue(exists(join(self.results_dir, "swarm_test", "otu_table.biom")))
-
-        # filter singletons from OTU table
-        filter_otus_from_otu_table_command = ["filter_otus_from_otu_table.py",
-                                              "-i",
-                                              join(self.results_dir, "swarm_test", "otu_table.biom"),
-                                              "-o",
-                                              join(self.filter_dir, "16S", "de_novo", "swarm_test", "otu_table_mc2.biom"),
-                                              "--min_count",
-                                              "2"]
-        proc = Popen(filter_otus_from_otu_table_command,
-                     stdout=PIPE,
-                     stderr=PIPE,
-                     close_fds=True)
-        proc.wait()
-        stdout, stderr = proc.communicate()
-        if stderr:
-            print stderr
-
-        self.assertTrue(exists(join(self.filter_dir, "16S", "de_novo", "swarm_test", "otu_table_mc2.biom")))
-
         # compute FP-chimera, FP-known and FP-other count
-        fp_chimera, fp_known, fp_other = compute_fp_other(self.root_dir,
-            self.precision_dir,
-            self.filter_dir,
+        fp_chimera, fp_known, fp_other = compute_fp_other(
+            join(self.root_dir, "program_results"),
+            join(self.root_dir, "precision"),
+            join(self.root_dir, "program_results"),
             taxonomy_mean,
             taxonomy_stdev,
             join(self.root_dir, "nt"),
@@ -229,7 +210,7 @@ class ComputePrecisionRecall(TestCase):
             "16S",
             "de_novo",
             "L6",
-            chimera_db_16S_fp,
+            self.chimera_db_16S,
             "1")
 
         print "fp_chimera = ", fp_chimera
@@ -693,6 +674,103 @@ TGACCCAACTGTAAGCGGATGCTGCCGAAGGTGGGACCGATATCTGGGAAGGAGTCGTAACAAGGTAGCC
 GT
 """
 
+biom_table_mc2 = ('{"id": "No Table ID","format": "Biological Observation Matrix 2.1.0","format_url": '
+    '"http://biom-format.org","matrix_type": "sparse","generated_by": "BIOM-Format 2.1-dev","date": '
+    '"2015-03-21T04:43:33.739582","type": "OTU table","matrix_element_type": "float","shape": [20, 1],"data": '
+    '[[0,0,4.0],[1,0,4.0],[2,0,4.0],[3,0,4.0],[4,0,4.0],[5,0,3.0],[6,0,3.0],[7,0,3.0],[8,0,3.0],[9,0,2.0],[10,0,2.0],'
+    '[11,0,2.0],[12,0,2.0],[13,0,2.0],[14,0,2.0],[15,0,2.0],[16,0,2.0],[17,0,2.0],[18,0,2.0],[19,0,2.0]],"rows": '
+    '[{"id": "denovo0", "metadata": {"taxonomy": ["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria"]}},'
+    '{"id": "denovo1", "metadata": {"taxonomy": ["k__Bacteria", '
+    '"p__Firmicutes", "c__Clostridia", "o__Clostridiales", "f__Lachnospiraceae", "g__Dorea", "s__"]}},{"id": '
+    '"denovo2", "metadata": {"taxonomy": ["k__Bacteria", "p__Firmicutes", "c__Clostridia", "o__Clostridiales", '
+    '"f__Ruminococcaceae", "g__Ruminococcus", "s__"]}},{"id": "denovo3", "metadata": {"taxonomy": ["k__Bacteria", '
+    '"p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Providencia", '
+    '"s__"]}},{"id": "denovo4", "metadata": {"taxonomy": ["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", '
+    '"o__Pseudomonadales", "f__Moraxellaceae", "g__Acinetobacter", "s__"]}},{"id": "denovo5", "metadata": {"taxonomy": '
+    '["k__Bacteria", "p__Lentisphaerae", "c__[Lentisphaeria]", "o__Victivallales", "f__Victivallaceae", "g__Victivallis", '
+    '"s__vadensis"]}},{"id": "denovo6", "metadata": {"taxonomy": ["k__Bacteria", "p__Firmicutes", "c__Clostridia", '
+    '"o__Clostridiales", "f__Lachnospiraceae", "g__Dorea", "s__formicigenerans"]}},{"id": "denovo7", "metadata": '
+    '{"taxonomy": ["k__Bacteria", "p__Lentisphaerae", "c__[Lentisphaeria]", "o__Victivallales", "f__Victivallaceae", '
+    '"g__Victivallis", "s__vadensis"]}},{"id": "denovo8", "metadata": {"taxonomy": ["k__Bacteria", "p__Firmicutes", '
+    '"c__Clostridia", "o__Clostridiales"]}},{"id": "denovo9", "metadata": '
+    '{"taxonomy": ["k__Bacteria", "p__Firmicutes", "c__Clostridia", "o__Clostridiales", "f__Ruminococcaceae", '
+    '"g__Ruminococcus", "s__"]}},{"id": "denovo10", "metadata": {"taxonomy": ["k__Bacteria", "p__Firmicutes", '
+    '"c__Clostridia", "o__Clostridiales", "f__Lachnospiraceae", "g__Dorea", "s__"]}},{"id": "denovo11", "metadata": '
+    '{"taxonomy": ["k__Bacteria", "p__Firmicutes", "c__Clostridia", "o__Clostridiales"]}},{"id": "denovo16", "metadata": '
+    '{"taxonomy": ["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria"]}},{"id": "denovo17", "metadata": '
+    '{"taxonomy": ["k__Bacteria", "p__Firmicutes", "c__Clostridia", "o__Clostridiales"]}},{"id": '
+    '"denovo14", "metadata": {"taxonomy": ["k__Bacteria", "p__Firmicutes", "c__Clostridia", "o__Clostridiales", '
+    '"f__Lachnospiraceae", "g__Dorea", "s__formicigenerans"]}},{"id": "denovo15", "metadata": {"taxonomy": ["k__Bacteria", '
+    '"p__Firmicutes", "c__Clostridia", "o__Clostridiales", "f__Ruminococcaceae", "g__Ruminococcus", "s__"]}},{"id": '
+    '"denovo12", "metadata": {"taxonomy": ["k__Bacteria", "p__Firmicutes", "c__Clostridia", "o__Clostridiales"]}},{"id": '
+    '"denovo19", "metadata": {"taxonomy": ["k__Bacteria", "p__Firmicutes", "c__Bacilli"]}},{"id": "denovo18", '
+    '"metadata": {"taxonomy": ["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria"]}},{"id": "denovo13", "metadata": '
+    '{"taxonomy": ["k__Bacteria", "p__Firmicutes", "c__Clostridia", "o__Clostridiales"]}}],"columns": '
+    '[{"id": "MockMiSeq.even.673461", "metadata": {}}]}')
+
+otu_map = """denovo0\tMockMiSeq.even.673461_6423\tMockMiSeq.even.673461_17677\tMockMiSeq.even.673461_66033\tMockMiSeq.even.673461_184838
+denovo1\tMockMiSeq.even.673461_32563\tMockMiSeq.even.673461_46485\tMockMiSeq.even.673461_249529\tMockMiSeq.even.673461_163017
+denovo2\tMockMiSeq.even.673461_634\tMockMiSeq.even.673461_1009\tMockMiSeq.even.673461_1112\tMockMiSeq.even.673461_1481
+denovo3\tMockMiSeq.even.673461_25361\tMockMiSeq.even.673461_25373\tMockMiSeq.even.673461_34458\tMockMiSeq.even.673461_35596
+denovo4\tMockMiSeq.even.673461_1926\tMockMiSeq.even.673461_2041\tMockMiSeq.even.673461_5034\tMockMiSeq.even.673461_6443
+denovo5\tMockMiSeq.even.673461_74784\tMockMiSeq.even.673461_74575\tMockMiSeq.even.673461_53430
+denovo6\tMockMiSeq.even.673461_87316\tMockMiSeq.even.673461_171370\tMockMiSeq.even.673461_28777
+denovo7\tMockMiSeq.even.673461_8547\tMockMiSeq.even.673461_10065\tMockMiSeq.even.673461_11006
+denovo8\tMockMiSeq.even.673461_38935\tMockMiSeq.even.673461_118958\tMockMiSeq.even.673461_181069
+denovo9\tMockMiSeq.even.673461_88807\tMockMiSeq.even.673461_2216
+denovo10\tMockMiSeq.even.673461_65623\tMockMiSeq.even.673461_152618
+denovo11\tMockMiSeq.even.673461_57880\tMockMiSeq.even.673461_219746
+denovo16\tMockMiSeq.even.673461_38842\tMockMiSeq.even.673461_231002
+denovo17\tMockMiSeq.even.673461_189556\tMockMiSeq.even.673461_190261
+denovo14\tMockMiSeq.even.673461_53455\tMockMiSeq.even.673461_186323
+denovo15\tMockMiSeq.even.673461_41582\tMockMiSeq.even.673461_84993
+denovo12\tMockMiSeq.even.673461_36613\tMockMiSeq.even.673461_14266
+denovo19\tMockMiSeq.even.673461_159025\tMockMiSeq.even.673461_246660
+denovo18\tMockMiSeq.even.673461_18289\tMockMiSeq.even.673461_190870
+denovo13\tMockMiSeq.even.673461_210939\tMockMiSeq.even.673461_186909
+"""
+
+rep_set = """>denovo0 MockMiSeq.even.673461_6423
+TACGGAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAGCGCACGCAGGCGGTCTGTCAAGTCGGATGTGAAATCCCCGGGCTTAACCTGGGGGCTGCATTCCAAACTGGATATCTAGAGTGCAGGAGAGGAAAGCGGAATTCCTAG
+>denovo1 MockMiSeq.even.673461_32563
+TACGTATGGTGCAAGCGTTATCCGGATTTACTGGGTGTAAAGGGAGCGTAGACGGCTGTGTAAGTCTGAAGTGAAAGCCCGGGGCTCAACCCCGGGACTGCTTTGGAAACTATGCAGCTAGAGTGCAGGAGAGGAAAGCGGAATTCCTAG
+>denovo10 MockMiSeq.even.673461_65623
+TACGTAGGGGGCAAGCGTTATCCGGATTTACTGGGTGTAAAGGGAGCGTAGACGGCTGTGCAAGTCTGAAGTGAAAGCCCGGGGCTCAACCTCGGGACTGCTTTGGAAACTGTGCAGCTAGAGTGTCGGAGAGGTAAGTGGAATTCCCAG
+>denovo11 MockMiSeq.even.673461_57880
+TACGTATGGACCGAGCGTTGTCCGGAATCATTGGGCGTAAAGGGTACGTAGGCGGCCTAGTAAGTTAGAAGTTAAAGAATATAGCTCAACTATATAAAGCTTTTCAAACTGCTAGACCTGAGAGATGGGAGGGAAAGTGGAAATTCTAGT
+>denovo12 MockMiSeq.even.673461_36613
+TACGTATGGCGCAAGCGTTATCCGGATTTACTGGGCGTAAAGGGCGTGTAGGCGGCCATGCAAGTCAGAAGTGAAAATCCGGGGCTCAACCCCGGAACTGCTTTTGAAACTGTAAAGCTGGAGTGCAGGAGGGGTGAGTGGAATTCCTAG
+>denovo13 MockMiSeq.even.673461_210939
+TACGTAGGGGGCAAGCGTTATCCGGATTTACTGGGCGTAAAGGGAGCGTAGACGGCATGGCAAGCCAGATGTGAAAGCCCCGGGCTCAACCCCGGGACTGCATTTCGAACTGGCAAGCTAGAGTGTCGGAGAGGAAAGCGGAATTCCTAG
+>denovo14 MockMiSeq.even.673461_53455
+TACGTAGGGGGCAAGCGTTATCCGGATTTACTGGGTGTAAAGGGAGCGTAGACGGCATGGCAAGCCAGATGTGAAAGGCATGGGCTCAACCTGTGGACTGCTTTGGAAACTGTGCAGCTAGAGTGTCGGAGAGGTAAGTGGAATTCCTAG
+>denovo15 MockMiSeq.even.673461_41582
+TACGTAGGGAGCGAGCGTTGTCCGGATTTACTGGTGTAAAGGGTGCGTAGGCGGCGAGGCAAGTCAGGCGTGAAATCTATGGGCTTAACCCATAAACTGCGCTTGAAACTGTCTTGCTTGAGTGAAGTAGAGGTAGGCGGAATTCCCGGG
+>denovo16 MockMiSeq.even.673461_38842
+TACGGAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAGCGCACGCAGGCGGTCTGTTAAGTCAGATGTGAAATCCCCGGGCTCAACCTGGGAACTGCATTTGGAACTGTCAGGCTAGAGTGTCGGAGAGGAAAGCGGAATTCCTAG
+>denovo17 MockMiSeq.even.673461_189556
+TACGTAGGGGGCAAGCGTTATCCGGATTTCCTTTTTTTCCCGGGAGCGTAGACGGCACGGCAAGCCAGATGTGAAAGCCCGGGGCTCAACCCCGGTCCTGCATTTGGAACTGCTGAGCTAGAGTTGTGGAGAGGCACGGAGAATTCCTAG
+>denovo18 MockMiSeq.even.673461_18289
+TACGGAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAGCGCACGCAGGCGGTTTGTTAAGTCAGATGTGAAATCCCCGGGCTCAACCTGTGGACTGCTTTGGAAACTGTGCAGCTAGAGTGTCGGAGAGGTAAGTGGAATTCCTAG
+>denovo19 MockMiSeq.even.673461_159025
+TACAGAGGTCTCAAGCGTTGTTCGGAATCACTGGGCGTAAAGCGTGCGTAGGCTGTTTCGTAAGTCGTGTGTGAAAGGCAGTGGCTTAACCATTGTTCGCTTTGGAAACTGTTAGACTTGAGTGCAGAAGGGGAGAGTGGAATTCCATGT
+>denovo2 MockMiSeq.even.673461_634
+TACGTAGGGAGCGAGCGTTGTCCGGATTTACTGGGTGTAAAGGGTGCGTAGGCGGCGAGGCAAGTCAGGCGTGAAATCTATGGGCTTAACCCATAAACTGCGCTTGAAACTGTCTTGCTTGAGTGAAGTAGAGGTAGGCGGAATTCCCGG
+>denovo3 MockMiSeq.even.673461_25361
+TACGGAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAGCGCACGCAGGCGGTTAATTAAGTTAGATGTGAAATCCCCGGGCTTAACCTGGGAATGGCATCTAAGACTGGTTAGCTAGAGTCTTGTAGAGGGGGGTAGAATTCCATG
+>denovo4 MockMiSeq.even.673461_1926
+TACAGAGGGTGCGAGCGTTAATCGGATTTACTGGGCGTAAAGCGTGCGTAGGCGGCTTTTTAAGTCGGATGTGAAATCCCCGAGCTTAACTTGGGAATTGCATTCGATACTGGGAAGCTAGAGTATGGGAGAGGATGGTAGAATTCCAGG
+>denovo5 MockMiSeq.even.673461_74784
+AACGTAGGGTGCAAGCGTTGTTCGGATTTATTGGGCGTAAAGGGTCTGTAGGAGGTTTGTTAAATACGAGGTGAAATCCGGGGGCTCAACTTCCGAATTGCCTTGTAGACTGATGAACTAGAGTACTGGAGAGGTAAGCGGAATACCAGG
+>denovo6 MockMiSeq.even.673461_87316
+TACGTAGGGGGCAAGCGTTATCCGGATTTACTGGGTGTAAAGGGAGCGTAGACGGCTGTGCAAGTCTGAAGTGAAAGGCATGGGCTCAACCTGTGGACTGCTTTGGAAACTGTGCAGCTAGAGTGTCGGGGAGGGAAGTGGGAATTCTAG
+>denovo7 MockMiSeq.even.673461_8547
+TACGTAGGTGGCGAGCGTTGTTCGGATTTATTGGGCGTAAAGGGTCTGTAGGAGGTTTGTTAAATACGAGGTGAAATCCGGGGGCTCAACTTCCGAATTGCCTTGTAGACTGATGAACTAGAGTACTGGAGAGGTAAGCGGAATACCAGG
+>denovo8 MockMiSeq.even.673461_38935
+TACGGAGGATCCGAGCGTTGTCCGGATTTACTGGGTGTAAAGGGTGCGTAGGCGGCGAGGCAAGTCAGGCGTGAAATCTATGGGCTTAACCCATAAACTGCGCTTGAAACTGTCTTGCTTGAGTGAAGTAGAGGTAGGCGGAATTCCCGG
+>denovo9 MockMiSeq.even.673461_88807
+CACGTAGGTCACAAGCGTTGTCCGGATTTACTGGGTGTAAAGGGTGCGTAGGCGGCGAGGCAAGTCAGGCGTGAAATCTATGGGCTTAACCCATAAACTGCGCTTGAAACTGTCTTGCTTGAGTGAAGTAGAGGTAGGCGGAATTCCCGG
+"""
 
 if __name__ == '__main__':
     main()

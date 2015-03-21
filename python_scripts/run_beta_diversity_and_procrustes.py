@@ -81,7 +81,6 @@ if __name__ == '__main__':
 
     # coordinate matrices
     coordinate_matrices = sys.argv[13].split()
-    print "coordinate matrices = ", coordinate_matrices
 
     # genes
     datatypes = ['16S', '18S']
