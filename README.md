@@ -45,36 +45,36 @@ Scripts
 -------
 
 The benchmarking and analysis comparison can be executed using the following scripts (in given order).
-Scripts 1-12 require input arguments, all of which are defined in `launch_benchmark.sh`.
+Scripts 2-13 require input arguments, all of which are defined in `launch_benchmark.sh`.
 
-0. Launch full benchmark (executes all scripts below): <br/>
+1. Launch full benchmark (executes all scripts below): <br/>
 `OTU-clustering/shell_scripts/launch_benchmark.sh`<br/><br/>
 
 Otherwise, the user may launch each script individually, <br/><br/>
 
-1.  Simulate even and staggered community reads:<br/>
+2.  Simulate even and staggered community reads:<br/>
 `OTU-clustering/shell_scripts/simulate_reads.sh`
-2.  Launch all software (via QIIME’s pick_closed_reference_otus.py, pick_de_novo_otus.py and pick_open_reference_otus.py) on 16S datasets:<br/>
+3.  Launch all software (via QIIME’s pick_closed_reference_otus.py, pick_de_novo_otus.py and pick_open_reference_otus.py) on 16S datasets:<br/>
 `OTU-clustering/shell_scripts/commands_16S.sh`
-3.  Launch all software on 18S datasets:<br/>
+4.  Launch all software on 18S datasets:<br/>
 `OTU-clustering/shell_scripts/commands_18S.sh`
-4.  Remove singleton OTUs (OTUs consisting of only 1 read) from the final OTU tables generated in steps 2 and 3:<br/>
+5.  Remove singleton OTUs (OTUs consisting of only 1 read) from the final OTU tables generated in steps 2 and 3:<br/>
 `OTU-clustering/python_scripts/run_filter_singleton_otus.py`
-5.  Summarize taxonomy using filtered OTU tables:<br/>
+6.  Summarize taxonomy using filtered OTU tables:<br/>
 `OTU-clustering/python_scripts/run_summarize_taxa.py`
-6.  Summarize filtered OTU tables:<br/>
+7.  Summarize filtered OTU tables:<br/>
 `OTU-clustering/python_scripts/run_summarize_tables.py`
-7.  Compute true positive, false positive, false negative, precision, recall, F-measure and FP-chimera, FP-known, FP-other metrics using the summarized taxonomy results:<br/>
+8.  Compute true positive, false positive, false negative, precision, recall, F-measure and FP-chimera, FP-known, FP-other metrics using the summarized taxonomy results:<br/>
 `OTU-clustering/python_scripts/run_compute_precision_recall.py`
-8.  Generate alpha diversity plots:<br/>
+9.  Generate alpha diversity plots:<br/>
 `OTU-clustering/python_scripts/run_single_rarefaction_and_plot.py`
-9.  Generate beta diversity plots:<br/>
+10.  Generate beta diversity plots:<br/>
 `OTU-clustering/python_scripts/run_beta_diversity_and_procrustes.py`
-10. Generate taxonomy comparison tables:<br/>
+11. Generate taxonomy comparison tables:<br/>
 `OTU-clustering/python_scripts/run_compare_taxa_summaries.py`
-11. Generate taxonomy stacked bar plots:<br/>
+12. Generate taxonomy stacked bar plots:<br/>
 `OTU-clustering/python_scripts/run_generate_taxa_barcharts.py`
-12. Plot TP, FP-chimera, FP-known and FP-other results:<br/>
+13. Plot TP, FP-chimera, FP-known and FP-other results:<br/>
 `OTU-clustering/python_scripts/plot_tp_fp_distribution.py`
 
 Citing
