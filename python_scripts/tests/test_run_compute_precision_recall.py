@@ -107,7 +107,7 @@ class ComputePrecisionRecall(TestCase):
                                 self.blast_nt_db]
 
     def tearDown(self):
-    	remove_files(self.files_to_remove)
+        remove_files(self.files_to_remove)
         #rmtree(self.root_dir)
         pass
 
@@ -138,17 +138,17 @@ class ComputePrecisionRecall(TestCase):
         taxonomy_mean = {}
         taxonomy_stdev = {}
 
-        graph_abundance_func(true_positive_otus,
-                             false_positive_known_otus,
-                             false_positive_other_otus,
-							 false_positive_chimeric_otus,
-                             "16S",
-                             "swarm",
-                             "test",
-                             "de_novo",
-                             join(self.root_dir, "program_results"),
-                             taxonomy_mean,
-                             taxonomy_stdev)
+        graph_abundance_func(true_positive_otus=true_positive_otus,
+                             false_positive_known_otus=false_positive_known_otus,
+                             false_positive_other_otus=false_positive_other_otus,
+                             false_positive_chimeric_otus=false_positive_chimeric_otus,
+                             datatype="16S",
+                             tool="swarm",
+                             study="test",
+                             method="de_novo",
+                             results_dir=join(self.root_dir, "program_results"),
+                             taxonomy_mean=taxonomy_mean,
+                             taxonomy_stdev=taxonomy_stdev)
 
         taxonomy_mean_expected =  {'swarm': [8.0, 5.0, 11.0, 5.0]}
         taxonomy_stdev_expected =  {'swarm': [3.0, 1.0, 0.0, 3.0]}
@@ -197,21 +197,21 @@ class ComputePrecisionRecall(TestCase):
 
         # compute FP-chimera, FP-known and FP-other count
         fp_chimera, fp_known, fp_other = compute_fp_other(
-            join(self.root_dir, "program_results"),
-            join(self.root_dir, "precision"),
-            join(self.root_dir, "program_results"),
-            taxonomy_mean,
-            taxonomy_stdev,
-            join(self.root_dir, "nt"),
-            actual_tax,
-            expected_tax,
-            "swarm",
-            "test",
-            "16S",
-            "de_novo",
-            "L6",
-            self.chimera_db_16S,
-            "1")
+            results_dir=join(self.root_dir, "program_results"),
+            out_dir=join(self.root_dir, "precision"),
+            filter_otus_dir=join(self.root_dir, "program_results"),
+            taxonomy_mean=taxonomy_mean,
+            taxonomy_stdev=taxonomy_stdev,
+            blast_nt_index=join(self.root_dir, "nt"),
+            actual_tax=actual_tax,
+            expected_tax=expected_tax,
+            tool="swarm",
+            study="test",
+            datatype="16S",
+            method="de_novo",
+            tax_level="L6",
+            chimera_db_16S=self.chimera_db_16S,
+            threads="1")
 
         print "fp_chimera = ", fp_chimera
         print "fp_known = ", fp_known
