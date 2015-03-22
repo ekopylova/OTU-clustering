@@ -20,7 +20,6 @@ from os.path import (abspath, exists, getsize, join,
                      dirname, splitext, basename)
 from tempfile import mkstemp, mkdtemp
 from shutil import rmtree, move
-from StringIO import StringIO
 
 from skbio.parse.sequences import parse_fasta
 from skbio.util import remove_files
