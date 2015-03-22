@@ -67,7 +67,6 @@ class GenerateAbundance(TestCase):
     def tearDown(self):
         remove_files(self.files_to_remove)
         rmtree(self.root_dir)
-        pass
 
     def test_create_abundance(self):
         """ Test create_abundance() method
