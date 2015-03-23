@@ -13,7 +13,7 @@ Unit tests for plot_tp_fp_distribution.py
 # ----------------------------------------------------------------------------
 
 from unittest import TestCase, main
-from tempfile import mkstemp, mkdtemp
+from tempfile import mkdtemp
 from os.path import join, isfile
 from os import close, makedirs, rename
 from shutil import rmtree
@@ -28,7 +28,7 @@ class PlotTruePositiveFalsePositiveDistributions(TestCase):
     """ Tests for plot_tp_fp_distribution.py functionality """
 
     def setUp(self):
-        """ Create temporary seqs file
+        """ Create temporary working directory
         """
         self.root_dir = mkdtemp()
         makedirs(join(self.root_dir, "16S", "de_novo"))
@@ -64,7 +64,7 @@ class PlotTruePositiveFalsePositiveDistributions(TestCase):
 			studies=studies,
 			output_dir=self.root_dir)
 
-        self.assertTrue(isfile(join(self.root_dir, "tp_plot_de_novo_test.png")))
+        self.assertTrue(isfile(join(self.root_dir, "tp_plot_de_novo_test.pdf")))
 
 
 taxonomy_mean = """sumaclust	8250.0	33.0	88.0	0.0	

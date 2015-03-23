@@ -129,7 +129,7 @@ def plot_tp_fp_distribution(
                     legend.append(plots[i][0])
                 ax.legend(legend, tools_lgd)
 
-                plt.savefig(join(output_dir, "tp_plot_%s_%s.png" % (method, study)), bbox_inches="tight", bbox_extra_artist=[ax.legend])
+                plt.savefig(join(output_dir, "tp_plot_%s_%s.pdf" % (method, study)), bbox_inches="tight", bbox_extra_artist=[ax.legend])
                 plt.clf()
 
 def main(argv):

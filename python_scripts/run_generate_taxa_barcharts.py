@@ -9,76 +9,65 @@
 #-----------------------------------------------------------------------------
 
 """
-Generate layered taxonomy barcharts for each tool.
-
-usage: python run_generate_taxa_barcharts
+Generate layered taxonomy barcharts for each OTU clustering tool
 """
 
 import sys
 import os
+from os.path import isfile
 import random
 import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
+# requires matplot version 1.2.1 (or one that supports fontsize in the legend)
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import brewer2mpl
 
-if __name__ == '__main__':
+def generate_taxa_barcharts(output_dir,
+                            taxa_summary_dir,
+                            datatypes,
+                            studies,
+                            studies_bac_mock,
+                            studies_euk_mock,
+                            methods,
+                            tools,
+                            top_N_taxa_mock,
+                            top_N_taxa_env):
+    """
+    This method draws a layered bargraph for summarizing the top N abundant
+    taxa recovered by each OTU clustering tool
 
-    # output directory
-    output_dir = sys.argv[1]
+    Parameters
+    ----------
+    output_dir : string
+        dirpath to store output
+    taxa_summary_dir : string
+        dirpath to summarized taxonomies (not including singleton OTUs)
+    datatypes : list
+        list of genes to analyze (16S, 18S)
+    studies : dictionary
+        dictionary with keys being a datatype (16S or 18S) and the values
+        being lists of studies to analyze
+    studies_bac_mock : list
+        list of mock bacterial study IDs
+    studies_euk_mock : list
+        list of mock eukaryotic study IDs
+    methods : list
+        list of OTU clustering methods (closed_ref, de_novo, open_ref)
+    tools : dictionary
+        dictionary with keys being a method and the values being a list
+        of tools designed to perform that method
+    top_N_taxa_mock : integer
+        number of top abundant taxonomies to illustrate for mock communities
+    top_N_taxa_env : integer
+        number of top abundant taxonomies to illustrate for environmental
+        communities
 
-    # summarized taxa (BIOM tables) directory
-    taxa_summary_dir = sys.argv[2]
-
-    # tools
-    tools_denovo = sys.argv[3].split()
-    tools_closed_ref = sys.argv[4].split()
-    tools_open_ref = sys.argv[5].split()
-
-    # list of tools for each OTU picking method
-    tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
-
-    for tool in tools_denovo:
-      if tool not in tools['de_novo']:
-        tools['de_novo'].append(tool)
-    for tool in tools_closed_ref:
-      if tool not in tools['closed_ref']:
-        tools['closed_ref'].append(tool)
-    for tool in tools_open_ref:
-      if tool not in tools['open_ref']:
-        tools['open_ref'].append(tool)
-
-    # studies 16S
-    studies_bac_mock = sys.argv[6].split()
-    studies_bac_env = sys.argv[7].split()
-    studies_bac = studies_bac_mock + studies_bac_env
-
-    # studies 18S
-    studies_euk_mock = sys.argv[8].split()
-    studies_euk_env = sys.argv[9].split()
-    studies_euk = studies_euk_mock + studies_euk_env
-
-    # list of studies for each gene type
-    studies = {'16S': [], '18S': []}
-
-    for study in studies_bac:
-      if study not in studies['16S']:
-        studies['16S'].append(study)
-
-    for study in studies_euk:
-      if study not in studies['18S']:
-        studies['18S'].append(study)
-
-    # genes
-    datatypes = ['16S', '18S']
-
-    # OTU picking methods
-    methods = ['de_novo', 'closed_ref', 'open_ref']
-
-    top_N_taxa_mock = int(sys.argv[10])
-    top_N_taxa_env = int(sys.argv[11])
+    Returns
+    -------
+    None
+    """
 
     # ex. 16S
     for datatype in datatypes:
@@ -97,7 +86,7 @@ if __name__ == '__main__':
                 # ex. swarm
                 for tool in tools[method]:
                     tax_sum_fp = os.path.join(taxa_summary_dir, datatype, method, "%s_%s" % (tool, study), "otu_table_mc2_%s.txt" % summary_level)
-                    if os.path.exists(tax_sum_fp):
+                    if isfile(tax_sum_fp):
                         num_tools+=1
                         with open(tax_sum_fp, 'U') as taxa_summary_f:
                             for line in taxa_summary_f:
@@ -219,5 +208,78 @@ if __name__ == '__main__':
             if not os.path.exists(outdir):
                 os.makedirs(outdir)
             plt.savefig(os.path.join(
-                outdir, "barchart_%s_top_%s.png" % (study, top_N_taxa)), bbox_inches="tight", bbox_extra_artist=[lgd])
+                outdir, "barchart_%s_top_%s.pdf" % (study, top_N_taxa)), bbox_inches="tight", bbox_extra_artist=[lgd])
             plt.clf()
+
+
+def main(argv):
+
+    # output directory
+    output_dir = sys.argv[1]
+
+    # summarized taxa (BIOM tables) directory
+    taxa_summary_dir = sys.argv[2]
+
+    # tools
+    tools_denovo = sys.argv[3].split()
+    tools_closed_ref = sys.argv[4].split()
+    tools_open_ref = sys.argv[5].split()
+
+    # list of tools for each OTU picking method
+    tools = {'de_novo': [], 'closed_ref': [], 'open_ref': []}
+
+    for tool in tools_denovo:
+      if tool not in tools['de_novo']:
+        tools['de_novo'].append(tool)
+    for tool in tools_closed_ref:
+      if tool not in tools['closed_ref']:
+        tools['closed_ref'].append(tool)
+    for tool in tools_open_ref:
+      if tool not in tools['open_ref']:
+        tools['open_ref'].append(tool)
+
+    # studies 16S
+    studies_bac_mock = sys.argv[6].split()
+    studies_bac_env = sys.argv[7].split()
+    studies_bac = studies_bac_mock + studies_bac_env
+
+    # studies 18S
+    studies_euk_mock = sys.argv[8].split()
+    studies_euk_env = sys.argv[9].split()
+    studies_euk = studies_euk_mock + studies_euk_env
+
+    # list of studies for each gene type
+    studies = {'16S': [], '18S': []}
+
+    for study in studies_bac:
+      if study not in studies['16S']:
+        studies['16S'].append(study)
+
+    for study in studies_euk:
+      if study not in studies['18S']:
+        studies['18S'].append(study)
+
+    # genes
+    datatypes = ['16S', '18S']
+
+    # OTU picking methods
+    methods = ['de_novo', 'closed_ref', 'open_ref']
+
+    top_N_taxa_mock = int(sys.argv[10])
+    top_N_taxa_env = int(sys.argv[11])
+
+    generate_taxa_barcharts(
+        output_dir=output_dir,
+        taxa_summary_dir=taxa_summary_dir,
+        datatypes=datatypes,
+        studies=studies,
+        studies_bac_mock=studies_bac_mock,
+        studies_euk_mock=studies_euk_mock,
+        methods=methods,
+        tools=tools,
+        top_N_taxa_mock=top_N_taxa_mock,
+        top_N_taxa_env=top_N_taxa_env)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
