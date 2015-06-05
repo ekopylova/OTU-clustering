@@ -33,7 +33,7 @@ Install
 Datasets
 --------
 
-1. [Read datasets](ftp://ftp.microbio.me/pub/supplemental_otu_clustering_datasets.tar.gz)
+1. Read datasets: ftp://ftp.microbio.me/pub/supplemental_otu_clustering_datasets.tar.gz
 2. [Greengenes 13.8](ftp://ftp.greengenes.microbio.me/greengenes_release/gg_13_5/gg_13_8_otus.tar.gz) database
 3. [SILVA 111](ftp://ftp.microbio.me/pub/QIIME_nonstandard_referencedb/Silva_111.tgz) database
 4. [16S PyNAST template](http://greengenes.lbl.gov/Download/Sequence_Data/Fasta_data_files/core_set_aligned.fasta.imputed)
