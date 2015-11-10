@@ -6,6 +6,7 @@ jobs_to_start=$3      # for parallel_assign_taxonomy_rdp.py
 reference_fasta=$4    # for parallel_assign_taxonomy_rdp.py
 reference_taxonomy=$5 # for parallel_assign_taxonomy_rdp.py
 study=$6
+template_str=$8       # PyNAST
 declare -A micca_trimlen=( ["1688"]="150" ["1686"]="150" ["1685"]="200" ["449"]="200" ["even"]="150" ["staggered"]="150" ["nematodes"]="200" ["632"]="100" ["2107"]="150")
 
 mkdir $output_dir
@@ -49,23 +50,23 @@ sed -i 's/_/||/' $output_dir/"${reads_name}_rep.fa"
 
 # Assign taxonomy
 echo "parallel_assign_taxonomy_rdp.py"
-parallel_assign_taxonomy_rdp.py -i $output_dir/"${reads_name}_rep.fa" -o $output_dir/rdp_assigned_taxonomy \
+parallel_assign_taxonomy_rdp.py -i $output_dir/${reads_name}_rep.fa -o $output_dir/rdp_assigned_taxonomy \
 -T --jobs_to_start $jobs_to_start --reference_seqs_fp $reference_fasta --id_to_taxonomy_fp $reference_taxonomy
 
 # Create BIOM table 
 echo "make_otu_table.py"
-make_otu_table.py -i $output_dir/"${reads_name}_otus.txt" -o $output_dir/otu_table.biom \
+make_otu_table.py -i $output_dir/${reads_name}_otus.txt -o $output_dir/otu_table.biom \
 -t $output_dir/rdp_assigned_taxonomy/otus_tax_assignments.txt
 
 # Align sequences command 
 echo "parallel_align_seqs_pynast.py"
-parallel_align_seqs_pynast.py -i $output_dir/"${reads_name}_rep.fa" -o $output_dir/pynast_aligned_seqs \
+parallel_align_seqs_pynast.py -i $output_dir/${reads_name}_rep.fa -o $output_dir/pynast_aligned_seqs \
 -T --jobs_to_start $jobs_to_start --template_fp $template_str
 
 # Filter alignment command 
 echo "filter_alignment.py"
-filter_alignment.py -o $output_dir/pynast_aligned_seqs -i $output_dir/pynast_aligned_seqs/otus_aligned.fasta 
+filter_alignment.py -o $output_dir/pynast_aligned_seqs -i $output_dir/pynast_aligned_seqs/${reads_name}_rep_aligned.fasta 
 
 # Build phylogenetic tree command 
 echo "make_phylogeny.py"
-make_phylogeny.py -i $output_dir/pynast_aligned_seqs/otus_aligned_pfiltered.fasta -o $output_dir/rep_set.tre
+make_phylogeny.py -i $output_dir/pynast_aligned_seqs/${reads_name}_rep_aligned_pfiltered.fasta -o $output_dir/rep_set.tre

@@ -1,15 +1,36 @@
-# usage run_mothur.sh
+# This script closely follows the MiSeq SOP outlined here: http://www.mothur.org/wiki/MiSeq_SOP
+# Kozich JJ, Westcott SL, Baxter NT, Highlander SK, Schloss PD. (2013): Development of a
+# dual-index sequencing strategy and curation pipeline for analyzing amplicon sequence
+# data on the MiSeq Illumina sequencing platform. Applied and Environmental Microbiology.
+# 79(17):5112-20.
 
 reads=$1                      # from split_libraries_fastq.py (demultiplexed and barcode-primer removed FASTQ file)
 output_dir=$2
-jobs_to_start=$3              # for parallel_assign_taxonomy_rdp.py
-reference_fasta=$4            # for parallel_assign_taxonomy_rdp.py
-reference_fasta_aligned=$5    # for mothur alignment
-reference_taxonomy=$6         # for parallel_assign_taxonomy_rdp.py
-study=$7
-trainset_tax=$8               # for mothur classify.seqs
-trainset_fasta=$9             # for mothur classify.seqs
-declare -A mothur_trimlen=( ["1688"]="150" ["1686"]="150" ["1685"]="200" ["449"]="200" ["even"]="150" ["staggered"]="150" ["nematodes"]="200" ["632"]="100" ["2107"]="150")
+threads=$3
+jobs_to_start=$4              # for parallel_assign_taxonomy_rdp.py
+reference_fasta=$5            # for parallel_assign_taxonomy_rdp.py
+reference_fasta_aligned=$6    # for mothur alignment
+reference_taxonomy=$7         # for parallel_assign_taxonomy_rdp.py
+study=$8
+trainset_tax=$9               # for mothur classify.seqs
+trainset_fasta=${10}          # for mothur classify.seqs
+taxon_to_remove=${11}
+algorithm=${12}               # nearest, furthest, average
+template_str=${13}            # PyNAST
+
+declare -A mothur_trimlen=( ["1688"]="150" ["1686"]="151" ["1685"]="200" ["even"]="150" ["staggered"]="150" ["632"]="100" ["2107"]="150")
+
+algorithm_abr=""
+if [ "$algorithm" == "average" ]; then
+	algorithm_abr="an"
+elif [ "$algorithm" == "nearest" ]; then
+	algorithm_abr="nn"
+elif [ "$algorithm" == "furthest" ]; then
+	algorithm_abr="fn"
+else
+	echo "$algorithm not supported"
+	exit
+fi
 
 mkdir $output_dir
 
@@ -25,7 +46,7 @@ reads_name="${reads_file%.*}"
 # file for make.contigs().
 #
 mothur_output=$output_dir/mothur_output
-mkdir $othur_output
+mkdir $mothur_output
 touch $mothur_output/"mothur.file"
 # Reverse-complement FASTQ reads
 seqtk seq -r $reads > $output_dir/${reads_name}_rc.fastq
@@ -37,7 +58,7 @@ do
 	mv $f ${f%.fastq}_R1.fastq
 	# Create entry for sample in mothur mapping file for make.contigs()
 	file=$(basename $f .fastq)
-	printf "$file ${file}_R1.fastq\n" >> $mothur_output/"mothur.file"
+	printf "$file ${file}_R1.fastq ${file}_R2.fastq\n" >> $mothur_output/"mothur.file"
 done
 # Reverse (rename output files to include 'R2')
 split_sequence_file_on_sample_ids.py -i $output_dir/${reads_name}_rc.fastq -o $output_dir/split_rc --file_type fastq
@@ -49,6 +70,7 @@ done
 # Move preprocessed sequences to output directory
 mv $output_dir/split/*.fastq $mothur_output
 mv $output_dir/split_rc/*.fastq $mothur_output
+cd $mothur_output
 
 # Overlap forward and reverse reads
 # Output File Names: 
@@ -58,38 +80,46 @@ mv $output_dir/split_rc/*.fastq $mothur_output
 #  + mothur.scrap.contigs.fasta
 #  + mothur.scrap.contigs.qual
 #  + mothur.contigs.groups
-mothur "#make.contigs(file=${mothur_output}/mothur.file, processors=$threads)"
+mothur "#make.contigs(file=mothur.file, processors=$threads)" > step_1_make_contigs.log
 
 # Filter ambiguous sequences and sequences longer than ${mothur_trimlen["$study"]}
 # Output File Names: 
 #  + mothur.trim.contigs.good.fasta
 #  + mothur.trim.contigs.bad.accnos
 #  + mothur.contigs.good.groups
-mothur "#screen.seqs(fasta=${mothur_output}/mothur.trim.contigs.fasta, group=${mothur_output}/mothur.contigs.groups, maxambig=0, maxlength=${mothur_trimlen["$study"]})"
+mothur "#screen.seqs(fasta=mothur.trim.contigs.fasta, group=mothur.contigs.groups, maxambig=0, maxlength=${mothur_trimlen["$study"]}, processors=$threads)" > step_2_screen_seqs.log
 
 # Dereplication
 # Output File Names: 
 #  + mothur.trim.contigs.good.names
 #  + mothur.trim.contigs.good.unique.fasta
-mothur "#unique.seqs(fasta=${mothur_output}/mothur.trim.contigs.good.fasta)"
+mothur "#unique.seqs(fasta=mothur.trim.contigs.good.fasta)" > step_3_unique_seqs.log
 
 # Calculate the frequencies of each sequence in each sample
 # Output File Names: 
 #  + mothur.trim.contigs.good.count_table
-mothur "#count.seqs(name=${mothur_output}/mothur.trim.contigs.good.names, group=${mothur_output}/mothur.contigs.good.groups)"
+mothur "#count.seqs(name=mothur.trim.contigs.good.names, group=mothur.contigs.good.groups)" > step_4_count_seqs.log
 
 # Align sequences
 # Output File Names:
 #  + mothur.trim.contigs.good.unique.align
 #  + mothur.trim.contigs.good.unique.align.report
-mothur "#align.seqs(fasta=${mothur_output}/mothur.trim.contigs.good.unique.fasta, reference=${reference_aligned})"
+mothur "#align.seqs(fasta=mothur.trim.contigs.good.unique.fasta, reference=${reference_fasta_aligned}, processors=$threads)" > step_5_align_seqs.log
 
 # Run summary.seqs and use output file mothur.trim.contigs.good.unique.summary to
 # determine the start and end positions of alignments
-mothur "#summary.seqs(fasta=${mothur_output}/mothur.trim.contigs.good.unique.align, count=${mothur_output}/mothur.trim.contigs.good.count_table)" > ${mothur_output}/summary.txt
+mothur "#summary.seqs(fasta=mothur.trim.contigs.good.unique.align, count=${mothur_output}/mothur.trim.contigs.good.count_table, processors=$threads)" > step_6_summary_seqs.log
 
-start_pos=$(awk '{if ($1=="Median:") printf $2}' ${mothur_output}/summary.txt)
-end_pos=$(awk '{if ($1=="Median:") printf $3}' ${mothur_output}/summary.txt)
+start_pos=$(awk '{if ($1=="Median:") printf $2}' step_6_summary_seqs.log)
+end_pos=$(awk '{if ($1=="Median:") printf $3}' step_6_summary_seqs.log)
+
+if [ -z "$start_pos" ]; then
+	echo "Start position of alignment could not be determined, exiting."
+	exit
+elif [ -z "$end_pos" ]; then
+	echo "End position of alignment could not be determined, exiting."
+	exit
+fi
 
 # Filter sequences that fail to overlap from start_pos to end_pos
 # Output File Names: 
@@ -97,73 +127,68 @@ end_pos=$(awk '{if ($1=="Median:") printf $3}' ${mothur_output}/summary.txt)
 #  + mothur.trim.contigs.good.unique.good.align
 #  + mothur.trim.contigs.good.unique.bad.accnos
 #  + mothur.trim.contigs.good.good.count_table
-mothur "#screen.seqs(fasta=${mothur_output}/mothur.trim.contigs.good.unique.align, count=${mothur_output}/mothur.trim.contigs.good.count_table, summary=${mothur_output}/mothur.trim.contigs.good.unique.summary, start=${start_pos}, end=${end_pos}, maxhomop=8)"
+mothur "#screen.seqs(fasta=mothur.trim.contigs.good.unique.align, count=mothur.trim.contigs.good.count_table, summary=mothur.trim.contigs.good.unique.summary, start=${start_pos}, end=${end_pos}, maxhomop=8, processors=$threads)" > step_7_screen_seqs.log
 # Output File Names: 
 #  + mothur.filter
 #  + mothur.trim.contigs.good.unique.good.filter.fasta
-mothur "#filter.seqs(fasta=${mothur_output}/mothur.trim.contigs.good.unique.good.align, vertical=T, trump=.)"
+mothur "#filter.seqs(fasta=mothur.trim.contigs.good.unique.good.align, vertical=T, trump=., processors=$threads)" > step_8_filter_seqs.log
 
 # Dereplicate aligned sequences
 # Output File Names: 
 # + mothur.trim.contigs.good.unique.good.filter.count_table
 # + mothur.trim.contigs.good.unique.good.filter.unique.fasta
-mothur "#unique.seqs(fasta=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.fasta, count=${mothur_output}/mothur.trim.contigs.good.good.count_table)"
+mothur "#unique.seqs(fasta=mothur.trim.contigs.good.unique.good.filter.fasta, count=mothur.trim.contigs.good.good.count_table)" > step_9_unique_seqs.log
 
 # Pre-cluster the aligned sequences
 # Output File Names: 
 # + mothur.trim.contigs.good.unique.good.filter.unique.precluster.fasta
 # + mothur.trim.contigs.good.unique.good.filter.unique.precluster.count_table
 # + mothur.trim.contigs.good.unique.good.filter.unique.precluster.s1.map
-mothur "#pre.cluster(fasta=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.fasta, count=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.count_table, diffs=2)"
+mothur "#pre.cluster(fasta=mothur.trim.contigs.good.unique.good.filter.unique.fasta, count=mothur.trim.contigs.good.unique.good.filter.count_table, diffs=2)" > step_10_precluster.log
 
 # Identify chimeric sequences and remove them
 # Output File Names: 
 # + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta
-mothur "#chimera.uchime(fasta=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.count_table, dereplicate=t); remove.seqs(fasta=current, accnos=current)"
+mothur "#chimera.uchime(fasta=mothur.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=mothur.trim.contigs.good.unique.good.filter.unique.precluster.count_table, dereplicate=t); remove.seqs(fasta=current, accnos=current)" > step_11_uchime.log
 
-# Assign taxonomy to clean sequences, final quality control step to remove sequences
-# hitting taxons other than the expected
+# Assign taxonomy to clean sequences
 # Output File Names: 
 # + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.taxonomy
 # + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.tax.summary
-mothur "#classify.seqs(fasta=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta, count=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.uchime.pick.count_table, reference=${trainset_fasta}, taxonomy=${trainset_tax}, cutoff=80)"
+mothur "#classify.seqs(fasta=mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta, count=mothur.trim.contigs.good.unique.good.filter.unique.precluster.uchime.pick.count_table, reference=${trainset_fasta}, taxonomy=${trainset_tax}, cutoff=80)" > step_12_classify_seqs.log
 
 # Remove unexpected lineages
 # Output File Names: 
 #  + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.pick.taxonomy
 #  + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta
 #  + mothur.trim.contigs.good.unique.good.filter.unique.precluster.uchime.pick.pick.count_table
-mothur "#remove.lineage(fasta=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta, count=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.uchime.pick.count_table, taxonomy=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.taxonomy, taxon=Chloroplast-Mitochondria-unknown-Archaea-Eukaryota)"
+mothur "#remove.lineage(fasta=mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta, count=mothur.trim.contigs.good.unique.good.filter.unique.precluster.uchime.pick.count_table, taxonomy=mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.taxonomy, taxon=${taxon_to_remove})" > step_13_remove_lineage.log
 
-# Cluster (generate mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.list)
-# METHOD: AVERAGE LINKAGE
+# Cluster
 # Output File Names: 
-#  + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.list
-mothur "#cluster.split(fasta=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, count=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.uchime.pick.pick.count_table, taxonomy=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.pick.taxonomy, splitmethod=classify, taxlevel=4, cutoff=0.15, method=average)"
+#  + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.list
+mothur "#cluster.split(fasta=mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, count=mothur.trim.contigs.good.unique.good.filter.unique.precluster.uchime.pick.pick.count_table, taxonomy=mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.pick.taxonomy, splitmethod=classify, taxlevel=4, cutoff=0.15, method=$algorithm, processors=$threads)" > step_14_cluster_split.log
 
 # Compute number of sequences in each OTU
 # Output File Names: 
-#  + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.shared
-#  + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.s1.rabund
-mothur "#make.shared(list=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.list, count=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.uchime.pick.pick.count_table, label=0.03)"
+#  + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.shared
+#  + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.s1.rabund
+mothur "#make.shared(list=mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.list, count=mothur.trim.contigs.good.unique.good.filter.unique.precluster.uchime.pick.pick.count_table, label=0.03)" > step_15_make_shared.log
 
 # Create BIOM table
 # Output File Names: 
-#   + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.biom
-mothur "#make.biom(shared=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.shared)"
-mv mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.biom ${output_dir}/${reads_name}.biom
+#   + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.0.03.biom
+mothur "#make.biom(shared=mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.shared)" > step_16_make_biom.log
+mv mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.0.03.biom ${output_dir}/${reads_name}.biom
 
 # Create representative FASTA file for OTUs
-# Output File Names: 
-#   + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.dist
-mothur "#dist.seqs(fasta=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta, processors=$threads)"
 # Output File Names:
-#   + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.rep.names
-#   + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.rep.fasta
-mothur "#get.oturep(column=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.dist, list=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.list, name=${mothur_output}/mothur.trim.contigs.good.names, fasta=${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, label=0.03)"
+#   + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.0.03.rep.names
+#   + mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.0.03.rep.fasta
+mothur "#get.oturep(fasta=mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.fasta, list=mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.list, group=mothur.contigs.good.groups, name=mothur.trim.contigs.good.names, method=abundance, label=0.03)" > step_17_get_oturep.log
 
 # Convert FASTA alignment to FASTA file
-sed 's|-||g' ${mothur_output}/mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.an.unique_list.0.03.rep.fasta > ${output_dir}/${reads_name}_rep.fa
+sed 's|-||g' mothur.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.unique_list.0.03.rep.fasta > ${output_dir}/${reads_name}_rep.fa
 
 # Assign taxonomy
 echo "parallel_assign_taxonomy_rdp.py"
@@ -172,7 +197,8 @@ parallel_assign_taxonomy_rdp.py -i $output_dir/${reads_name}_rep.fa -o $output_d
 
 # Add taxonomy to BIOM table
 echo "biom add-metadata"
-biom add-metadata -i ${output_dir}/${reads_name}.biom -o ${output_dir}/${reads_name}_wtax.biom --observation-metadata-fp $output_dir/rdp_assigned_taxonomy/otus_tax_assignments.txt --observation-header OTUID,taxonomy,confidence
+biom add-metadata -i ${output_dir}/${reads_name}.biom -o ${output_dir}/${reads_name}_wtax.biom --observation-metadata-fp $output_dir/rdp_assigned_taxonomy/${reads_name}_rep_tax_assignments.txt --observation-header OTUID,taxonomy,confidence
+mv ${output_dir}/${reads_name}_wtax.biom ${output_dir}/${reads_name}.biom
 
 # Align sequences command 
 echo "parallel_align_seqs_pynast.py"
@@ -181,8 +207,8 @@ parallel_align_seqs_pynast.py -i $output_dir/${reads_name}_rep.fa -o $output_dir
 
 # Filter alignment command 
 echo "filter_alignment.py"
-filter_alignment.py -o $output_dir/pynast_aligned_seqs -i $output_dir/pynast_aligned_seqs/otus_aligned.fasta 
+filter_alignment.py -o $output_dir/pynast_aligned_seqs -i $output_dir/pynast_aligned_seqs/${reads_name}_rep_aligned.fasta 
 
 # Build phylogenetic tree command 
 echo "make_phylogeny.py"
-make_phylogeny.py -i $output_dir/pynast_aligned_seqs/otus_aligned_pfiltered.fasta -o $output_dir/rep_set.tre
+make_phylogeny.py -i $output_dir/pynast_aligned_seqs/${reads_name}_rep_aligned_pfiltered.fasta -o $output_dir/rep_set.tre
