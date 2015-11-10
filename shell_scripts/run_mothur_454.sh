@@ -33,14 +33,6 @@ mkdir $output_dir
 
 reads_file=$(basename $reads)
 reads_name="${reads_file%.*}"
-#
-# The first function of mothur's MiSeq SOP is make.contigs() which requires
-# a 3-column file with the first column representing sample IDs, second
-# being the forward reads and third the reverse reads. Since we're only
-# working with forward reads, here we make use of seqtk, QIIME's
-# split_sequence_file_on_sample_ids.py and bash commands to create the
-# reverse reads (reverse-complement of the forward reads) and the input
-# file for make.contigs().
 
 mothur_output=$output_dir/mothur_output
 mkdir $mothur_output
