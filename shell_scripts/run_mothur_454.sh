@@ -16,6 +16,9 @@ taxon_to_remove=${11}
 algorithm=${12}               # nearest, furthest, average
 template_str=${13}            # PyNAST
 declare -A mothur_trimlen=( ["449"]="200" ["nematodes"]="200" )
+# Reduced qwindowaverage score for nematodes because all sequences
+# failed for the suggested value of 35
+declare -A qwindowaverage_score=( ["449"]="35" ["nematodes"]="25" )
 
 algorithm_abr=""
 if [ "$algorithm" == "average" ]; then
@@ -36,19 +39,24 @@ reads_name="${reads_file%.*}"
 
 mothur_output=$output_dir/mothur_output
 mkdir $mothur_output
-# Here we split a FASTQ file based on sample IDs (this file has already
-# had barcode and primer sequences removed)
 convert_fastaqual_fastq.py -f $reads -o $mothur_output/fastaqual -c fastq_to_fastaqual
 mv $mothur_output/fastaqual/* $mothur_output/
 cd $mothur_output
 
-# Clean sequences
-# Output File Names: 
-#  + seqs.trim.fasta
-#  + seqs.scrap.fasta
-#  + seqs.trim.qual
-#  + seqs.scrap.qual
-mothur "#trim.seqs(fasta=${reads_name}.fna, qfile=${reads_name}.qual, flip=T, maxambig=0, maxhomop=8, qwindowaverage=35, qwindowsize=50, processors=$threads)" > step_1_trim_seqs.log
+## Clean sequences
+## Output File Names: 
+##  + seqs.trim.fasta
+##  + seqs.scrap.fasta
+##  + seqs.trim.qual
+##  + seqs.scrap.qual
+mothur "#trim.seqs(fasta=${reads_name}.fna, qfile=${reads_name}.qual, flip=T, maxambig=0, maxhomop=8, qwindowaverage=${qwindowaverage_score["$study"]}, qwindowsize=50, processors=$threads)" > step_1_trim_seqs.log
+
+## temporary, see output using QIIME's filtered file
+#cp $reads ./seqs.trim.fasta
+# remove data after first space in label
+#keep_seq_id.py ./seqs.trim.fasta > ./seqs.trim.u.fasta
+#mv ./seqs.trim.u.fasta ./seqs.trim.fasta
+
 
 # Create a group file (using QIIME's formatted labels)
 grep '>' ${reads_name}.trim.fasta | awk -F"[>,_]" '{printf $2"_"$3"\t"$2"\n";}' | sort -k 2,2 > ${reads_name}.trim.groups
@@ -64,7 +72,7 @@ mothur "#unique.seqs(fasta=${reads_name}.trim.fasta)" > step_2_unique_seqs.log
 # + seqs.trim.unique.align
 # + seqs.trim.unique.align.report
 # + seqs.trim.unique.flip.accnos
-mothur "#align.seqs(fasta=${reads_name}.trim.unique.fasta, reference=${reference_fasta_aligned}, processors=$threads)" > step_3_align_seqs.log
+mothur "#align.seqs(fasta=${reads_name}.trim.unique.fasta, reference=${reference_fasta_aligned}, flip=T, processors=$threads)" > step_3_align_seqs.log
 
 # Run summary.seqs and use the summary to determine the
 # start and end positions of alignments
@@ -72,7 +80,7 @@ mothur "#summary.seqs(fasta=${reads_name}.trim.unique.align, name=${reads_name}.
 
 end_pos=$(awk '{if ($1=="Median:") printf $3}' step_4_summary_seqs.log)
 
-elif [ -z "$end_pos" ]; then
+if [ -z "$end_pos" ]; then
 	echo "End position of alignment could not be determined, exiting."
 	exit
 fi
@@ -88,7 +96,8 @@ mothur "#screen.seqs(fasta=${reads_name}.trim.unique.align, name=${reads_name}.t
 # Output File Names: 
 # + seqs.filter
 # + seqs.trim.unique.good.filter.fasta
-mothur "#filter.seqs(fasta=${reads_name}.trim.unique.good.align, vertical=T, trump=., processors=$threads)" > step_6_filter_seqs.log
+#mothur "#filter.seqs(fasta=${reads_name}.trim.unique.good.align, vertical=T, trump=., processors=$threads)" > step_6_filter_seqs.log
+mothur "#filter.seqs(fasta=${reads_name}.trim.unique.good.align, vertical=T, processors=$threads)" > step_6_filter_seqs.log
 
 # Dereplicate aligned sequences
 # Output File Names: 
@@ -101,14 +110,14 @@ mothur "#unique.seqs(fasta=${reads_name}.trim.unique.good.filter.fasta, name=${r
 # + seqs.trim.unique.good.filter.unique.precluster.fasta
 # + seqs.trim.unique.good.filter.unique.precluster.names
 # + seqs.trim.unique.good.filter.unique.precluster.[SAMPLE_ID].map
-mothur "#pre.cluster(fasta=${reads_name}.trim.unique.good.filter.unique.fasta, name=${reads_name}.trim.unique.good.filter.names, group=${reads_name}.trim.good.groups, diffs=2)" > step_8_precluster.log
-rm *.map
+mothur "#pre.cluster(fasta=${reads_name}.trim.unique.good.filter.unique.fasta, name=${reads_name}.trim.unique.good.filter.names, group=${reads_name}.trim.good.groups, diffs=2, processors=$threads)" > step_8_precluster.log
+cat *.map > single.map
 
 # Identify chimeric sequences
 # Output File Names: 
 #  + seqs.trim.unique.good.filter.unique.precluster.uchime.chimeras
 #  + seqs.trim.unique.good.filter.unique.precluster.uchime.accnos
-mothur "#chimera.uchime(fasta=${reads_name}.trim.unique.good.filter.unique.precluster.fasta, name=${reads_name}.trim.unique.good.filter.unique.precluster.names, group=${reads_name}.trim.good.groups)" > step_9_uchime.log
+mothur "#chimera.uchime(fasta=${reads_name}.trim.unique.good.filter.unique.precluster.fasta, name=${reads_name}.trim.unique.good.filter.unique.precluster.names, group=${reads_name}.trim.good.groups, processors=$threads)" > step_9_uchime.log
 
 # Remove chimeric sequences
 # Output File Names: 
@@ -158,26 +167,32 @@ mv ${reads_name}.trim.unique.good.filter.unique.precluster.pick.pick.${algorithm
 mothur "#get.oturep(fasta=${reads_name}.trim.unique.good.filter.unique.precluster.pick.pick.fasta, list=${reads_name}.trim.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.list, group=${reads_name}.trim.good.pick.pick.groups, name=${reads_name}.trim.unique.good.filter.unique.precluster.pick.pick.names, method=abundance, label=0.03)" > step_15_get_oturep.log
 
 # Convert FASTA alignment to FASTA file
-sed 's|-||g' ${reads_name}.trim.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.0.03.rep.fasta > ${output_dir}/${reads_name}_rep.fa
+sed 's|[-.]||g' ${reads_name}.trim.unique.good.filter.unique.precluster.pick.pick.${algorithm_abr}.0.03.rep.fasta | awk -F"[>|\t]" '{if (NF>1) print ">"$3; else print $1;}' > ${output_dir}/${reads_name}_rep.fa
 
 # Assign taxonomy
 echo "parallel_assign_taxonomy_rdp.py"
-parallel_assign_taxonomy_rdp.py -i $output_dir/${reads_name}_rep.fa -o $output_dir/rdp_assigned_taxonomy \
--T --jobs_to_start $jobs_to_start --reference_seqs_fp $reference_fasta --id_to_taxonomy_fp $reference_taxonomy
+parallel_assign_taxonomy_rdp.py -i ${output_dir}/${reads_name}_rep.fa -o $output_dir/rdp_assigned_taxonomy \
+-T --jobs_to_start $jobs_to_start --reference_seqs_fp $reference_fasta --id_to_taxonomy_fp $reference_taxonomy --confidence 0.8
+#awk -F "[\t|]" '{print $2"\t"$5"\t"$6}' $output_dir/rdp_assigned_taxonomy/${reads_name}_rep_tax_assignments.txt > $output_dir/rdp_assigned_taxonomy/${reads_name}_rep_tax_assignments_2.txt
+#mv $output_dir/rdp_assigned_taxonomy/${reads_name}_rep_tax_assignments_2.txt $output_dir/rdp_assigned_taxonomy/${reads_name}_rep_tax_assignments.txt
 
 # Add taxonomy to BIOM table
 echo "biom add-metadata"
-biom add-metadata -i ${output_dir}/${reads_name}.biom -o ${output_dir}/${reads_name}_wtax.biom --observation-metadata-fp $output_dir/rdp_assigned_taxonomy/${reads_name}_rep_tax_assignments.txt --observation-header OTUID,taxonomy,confidence
-mv ${output_dir}/${reads_name}_wtax.biom ${output_dir}/${reads_name}.biom
+biom add-metadata -i ${output_dir}/${reads_name}.biom -o ${output_dir}/${reads_name}_wtax.biom --observation-metadata-fp $output_dir/rdp_assigned_taxonomy/${reads_name}_rep_tax_assignments.txt --observation-header OTUID,taxonomy,confidence --sc-separated taxonomy
+mv ${output_dir}/${reads_name}_wtax.biom ${output_dir}/otu_table.biom
 
 # Align sequences command 
 echo "parallel_align_seqs_pynast.py"
-parallel_align_seqs_pynast.py -i $output_dir/${reads_name}_rep.fa -o $output_dir/pynast_aligned_seqs \
+parallel_align_seqs_pynast.py -i ${output_dir}/${reads_name}_rep.fa -o $output_dir/pynast_aligned_seqs \
 -T --jobs_to_start $jobs_to_start --template_fp $template_str
 
 # Filter alignment command 
 echo "filter_alignment.py"
-filter_alignment.py -o $output_dir/pynast_aligned_seqs -i $output_dir/pynast_aligned_seqs/${reads_name}_rep_aligned.fasta 
+if [ "$study" == "nematodes" ] || [ "$study" == "2107" ]; then
+    filter_alignment.py -o $output_dir/pynast_aligned_seqs -i $output_dir/pynast_aligned_seqs/${reads_name}_rep_aligned.fasta -e 0.10 -g 0.80
+else
+    filter_alignment.py -o $output_dir/pynast_aligned_seqs -i $output_dir/pynast_aligned_seqs/${reads_name}_rep_aligned.fasta
+fi
 
 # Build phylogenetic tree command 
 echo "make_phylogeny.py"
